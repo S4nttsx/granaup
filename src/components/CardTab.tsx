@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Plus, CreditCard, Trash2, Calendar, DollarSign, AlertCircle } from 'lucide-react';
-import { motion } from 'motion/react';
+import { Plus, CreditCard, Trash2, Calendar, DollarSign, AlertCircle, Edit2, X, Save } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { AppState, CreditCard as Card } from '../types';
 
 interface CardTabProps {
@@ -10,10 +10,23 @@ interface CardTabProps {
 
 export default function CardTab({ state, updateState }: CardTabProps) {
   const [isAdding, setIsAdding] = useState(false);
+  const [editingCard, setEditingCard] = useState<Card | null>(null);
+  
   const [name, setName] = useState('');
   const [limit, setLimit] = useState('');
   const [bill, setBill] = useState('');
   const [dueDate, setDueDate] = useState('');
+  const [cardNumber, setCardNumber] = useState('');
+
+  const resetForm = () => {
+    setName('');
+    setLimit('');
+    setBill('');
+    setDueDate('');
+    setCardNumber('');
+    setIsAdding(false);
+    setEditingCard(null);
+  };
 
   const addCard = () => {
     if (!name || !limit || !bill || !dueDate) return;
@@ -22,11 +35,32 @@ export default function CardTab({ state, updateState }: CardTabProps) {
       name,
       limit: parseFloat(limit),
       currentBill: parseFloat(bill),
-      dueDate
+      dueDate,
+      number: cardNumber
     };
     updateState({ cards: [...state.cards, newCard] });
-    setIsAdding(false);
-    setName(''); setLimit(''); setBill(''); setDueDate('');
+    resetForm();
+  };
+
+  const updateCard = () => {
+    if (!editingCard || !name || !limit || !bill || !dueDate) return;
+    const updatedCards = state.cards.map(c => 
+      c.id === editingCard.id 
+        ? { ...c, name, limit: parseFloat(limit), currentBill: parseFloat(bill), dueDate, number: cardNumber }
+        : c
+    );
+    updateState({ cards: updatedCards });
+    resetForm();
+  };
+
+  const handleEdit = (card: Card) => {
+    setEditingCard(card);
+    setName(card.name);
+    setLimit(card.limit.toString());
+    setBill(card.currentBill.toString());
+    setDueDate(card.dueDate);
+    setCardNumber(card.number || '');
+    setIsAdding(true);
   };
 
   const deleteCard = (id: string) => {
@@ -35,6 +69,12 @@ export default function CardTab({ state, updateState }: CardTabProps) {
 
   const formatCurrency = (val: number) => 
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+
+  const maskCardNumber = (num?: string) => {
+    if (!num) return '**** **** **** ****';
+    const last4 = num.slice(-4);
+    return `**** **** **** ${last4}`;
+  };
 
   return (
     <div className="space-y-6">
@@ -52,49 +92,90 @@ export default function CardTab({ state, updateState }: CardTabProps) {
         </button>
       </div>
 
-      {isAdding && (
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-6 bg-white dark:bg-slate-900 rounded-3xl border-2 border-violet-500/30 shadow-xl"
-        >
-          <h3 className="text-xl font-bold mb-4">Adicionar Cartão</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <input
-              type="text"
-              placeholder="Nome do Cartão (ex: Nubank)"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-violet-500"
-            />
-            <input
-              type="number"
-              placeholder="Limite Total (R$)"
-              value={limit}
-              onChange={(e) => setLimit(e.target.value)}
-              className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-violet-500"
-            />
-            <input
-              type="number"
-              placeholder="Fatura Atual (R$)"
-              value={bill}
-              onChange={(e) => setBill(e.target.value)}
-              className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-violet-500"
-            />
-            <input
-              type="text"
-              placeholder="Dia do Vencimento (ex: 15)"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-              className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-violet-500"
-            />
-          </div>
-          <div className="flex gap-3">
-            <button onClick={addCard} className="px-6 py-2 bg-violet-500 text-white font-bold rounded-xl">Salvar</button>
-            <button onClick={() => setIsAdding(false)} className="px-6 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold rounded-xl">Cancelar</button>
-          </div>
-        </motion.div>
-      )}
+      <AnimatePresence>
+        {isAdding && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="p-6 bg-white dark:bg-slate-900 rounded-3xl border-2 border-violet-500/30 shadow-xl"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold">{editingCard ? 'Editar Cartão' : 'Novo Cartão'}</h3>
+              <button onClick={resetForm} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-500 uppercase">Nome do Cartão</label>
+                <input
+                  type="text"
+                  placeholder="Ex: Nubank, Inter"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-violet-500"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-500 uppercase">Limite Total (R$)</label>
+                <input
+                  type="number"
+                  placeholder="0.00"
+                  value={limit}
+                  onChange={(e) => setLimit(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-violet-500"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-500 uppercase">Fatura Atual (R$)</label>
+                <input
+                  type="number"
+                  placeholder="0.00"
+                  value={bill}
+                  onChange={(e) => setBill(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-violet-500"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-500 uppercase">Dia do Vencimento</label>
+                <input
+                  type="text"
+                  placeholder="Ex: 15"
+                  value={dueDate}
+                  onChange={(e) => setDueDate(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-violet-500"
+                />
+              </div>
+              <div className="space-y-1 md:col-span-2">
+                <label className="text-xs font-bold text-slate-500 uppercase">Número do Cartão (Opcional)</label>
+                <input
+                  type="text"
+                  placeholder="Ex: 1234 5678 9101 1121"
+                  value={cardNumber}
+                  onChange={(e) => setCardNumber(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-violet-500"
+                />
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button 
+                onClick={editingCard ? updateCard : addCard} 
+                className="flex-1 py-3 bg-violet-500 text-white font-bold rounded-xl shadow-lg shadow-violet-500/20 hover:bg-violet-600 transition-all flex items-center justify-center gap-2"
+              >
+                <Save className="w-5 h-5" />
+                {editingCard ? 'Atualizar Cartão' : 'Salvar Cartão'}
+              </button>
+              <button 
+                onClick={resetForm} 
+                className="px-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold rounded-xl"
+              >
+                Cancelar
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {state.cards.length > 0 ? (
@@ -118,12 +199,18 @@ export default function CardTab({ state, updateState }: CardTabProps) {
                     </div>
                     <div>
                       <h4 className="text-xl font-bold">{card.name}</h4>
+                      <p className="text-xs text-slate-400 font-mono tracking-widest mb-1">{maskCardNumber(card.number)}</p>
                       <p className="text-sm text-slate-500">Vencimento dia {card.dueDate}</p>
                     </div>
                   </div>
-                  <button onClick={() => deleteCard(card.id)} className="p-2 text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all">
-                    <Trash2 className="w-5 h-5" />
-                  </button>
+                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                    <button onClick={() => handleEdit(card)} className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all">
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => deleteCard(card.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 mb-6">

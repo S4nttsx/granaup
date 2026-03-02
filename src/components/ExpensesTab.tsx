@@ -51,6 +51,7 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
   const [expenseCategory, setExpenseCategory] = useState(CATEGORIES[0]);
   const [expenseDate, setExpenseDate] = useState(new Date().toISOString().split('T')[0]);
   const [expenseRecurrence, setExpenseRecurrence] = useState<Transaction['recurrence']>('none');
+  const [expenseInstallments, setExpenseInstallments] = useState('1');
 
   // Process recurring expenses on mount
   useEffect(() => {
@@ -136,6 +137,8 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
   const handleAddExpense = () => {
     if (!expenseName || !expenseValue) return;
     
+    const installmentsTotal = parseInt(expenseInstallments) || 1;
+    
     const newExpense: Transaction = {
       id: Date.now().toString(),
       description: expenseName,
@@ -143,7 +146,11 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
       type: 'expense',
       category: expenseCategory,
       date: new Date(expenseDate).toISOString(),
-      recurrence: expenseRecurrence
+      recurrence: expenseRecurrence,
+      installments: installmentsTotal > 1 ? {
+        total: installmentsTotal,
+        current: 1
+      } : undefined
     };
 
     updateState({ transactions: [newExpense, ...state.transactions] });
@@ -157,11 +164,14 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
     setExpenseCategory(expense.category);
     setExpenseDate(new Date(expense.date).toISOString().split('T')[0]);
     setExpenseRecurrence(expense.recurrence || 'none');
+    setExpenseInstallments(expense.installments?.total.toString() || '1');
     setIsAddingExpense(true);
   };
 
   const handleUpdateExpense = () => {
     if (!editingExpense || !expenseName || !expenseValue) return;
+
+    const installmentsTotal = parseInt(expenseInstallments) || 1;
 
     const updatedTransactions = state.transactions.map(t => 
       t.id === editingExpense.id 
@@ -171,7 +181,11 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
             amount: parseFloat(expenseValue), 
             category: expenseCategory, 
             date: new Date(expenseDate).toISOString(),
-            recurrence: expenseRecurrence
+            recurrence: expenseRecurrence,
+            installments: installmentsTotal > 1 ? {
+              total: installmentsTotal,
+              current: t.installments?.current || 1
+            } : undefined
           } 
         : t
     );
@@ -186,6 +200,7 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
     setExpenseCategory(CATEGORIES[0]);
     setExpenseDate(new Date().toISOString().split('T')[0]);
     setExpenseRecurrence('none');
+    setExpenseInstallments('1');
     setIsAddingExpense(false);
     setEditingExpense(null);
   };
@@ -374,6 +389,9 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
                       onChange={(e) => setExpenseValue(e.target.value)}
                       className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-red-500"
                     />
+                    {parseInt(expenseInstallments) > 1 && (
+                      <p className="text-[10px] text-slate-400">Insira o valor TOTAL da compra parcelada.</p>
+                    )}
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs font-bold text-slate-500 uppercase">Categoria</label>
@@ -393,6 +411,17 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
                       type="date"
                       value={expenseDate}
                       onChange={(e) => setExpenseDate(e.target.value)}
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-red-500"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500 uppercase">Parcelas</label>
+                    <input
+                      type="number"
+                      min="1"
+                      placeholder="Ex: 12"
+                      value={expenseInstallments}
+                      onChange={(e) => setExpenseInstallments(e.target.value)}
                       className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-red-500"
                     />
                   </div>
@@ -463,6 +492,11 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
                               {getRecurrenceLabel(expense.recurrence)}
                             </span>
                           )}
+                          {expense.installments && (
+                            <span className="text-[10px] px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-500 rounded font-bold uppercase">
+                              {expense.installments.current}/{expense.installments.total}x
+                            </span>
+                          )}
                         </div>
                         <div className="flex items-center gap-2 text-xs text-slate-500">
                           <span className="flex items-center gap-1"><Tag className="w-3 h-3" /> {expense.category}</span>
@@ -471,7 +505,14 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                      <span className="font-bold text-red-500">-{formatCurrency(expense.amount)}</span>
+                      <div className="text-right">
+                        <span className="block font-bold text-red-500">-{formatCurrency(expense.amount)}</span>
+                        {expense.installments && (
+                          <span className="text-[10px] text-slate-400 font-medium">
+                            {expense.installments.total}x de {formatCurrency(expense.amount / expense.installments.total)}
+                          </span>
+                        )}
+                      </div>
                       <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button 
                           onClick={() => handleEditExpense(expense)}

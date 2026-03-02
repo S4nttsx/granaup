@@ -65,6 +65,54 @@ export default function Dashboard({ state, updateState }: DashboardProps) {
   const formatCurrency = (val: number) => 
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 
+  const futureInstallments = useMemo(() => {
+    const months: Record<string, number> = {};
+    const today = new Date();
+    
+    state.transactions.forEach(t => {
+      if (t.installments && t.installments.current < t.installments.total) {
+        const remaining = t.installments.total - t.installments.current;
+        const installmentValue = t.amount / t.installments.total;
+        
+        for (let i = 1; i <= remaining; i++) {
+          const futureDate = new Date(today.getFullYear(), today.getMonth() + i, 1);
+          const monthName = futureDate.toLocaleString('pt-BR', { month: 'long' });
+          const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+          months[capitalizedMonth] = (months[capitalizedMonth] || 0) + installmentValue;
+        }
+      }
+    });
+    
+    return Object.entries(months).slice(0, 4); // Show next 4 months
+  }, [state.transactions]);
+
+  const nextMonthForecast = useMemo(() => {
+    let installmentsTotal = 0;
+    let fixedExpensesTotal = 0;
+    let cardBillsTotal = state.cards.reduce((acc, c) => acc + c.currentBill, 0);
+
+    state.transactions.forEach(t => {
+      if (t.type === 'expense') {
+        if (t.installments && t.installments.current < t.installments.total) {
+          installmentsTotal += t.amount / t.installments.total;
+        } else if (t.recurrence && t.recurrence !== 'none') {
+          fixedExpensesTotal += t.amount;
+        }
+      }
+    });
+
+    const totalForecast = installmentsTotal + fixedExpensesTotal + cardBillsTotal;
+    const remainingForecast = state.salary - totalForecast;
+
+    return {
+      installments: installmentsTotal,
+      fixed: fixedExpensesTotal,
+      cards: cardBillsTotal,
+      total: totalForecast,
+      remaining: remainingForecast
+    };
+  }, [state.transactions, state.salary, state.cards]);
+
   return (
     <div className="space-y-8">
       {/* Header Stats */}
@@ -128,30 +176,56 @@ export default function Dashboard({ state, updateState }: DashboardProps) {
           </div>
         </div>
 
-        {/* Quick Actions / Summary */}
+        {/* Forecast Section */}
         <div className="space-y-6">
           <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
-            <h3 className="text-xl font-bold mb-4">Divisão Automática</h3>
+            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <TrendingDown className="w-5 h-5 text-red-500" />
+              Previsão Próximo Mês
+            </h3>
             <div className="space-y-4">
-              <DistributionRow label="Gastos" percent={state.distribution.expenses} color="bg-red-500" />
-              <DistributionRow label="Metas" percent={state.distribution.goals} color="bg-blue-500" />
-              <DistributionRow label="Investimentos" percent={state.distribution.investments} color="bg-emerald-500" />
-              <DistributionRow label="Cripto" percent={state.distribution.crypto} color="bg-amber-500" />
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500">Parcelas:</span>
+                <span className="font-bold">{formatCurrency(nextMonthForecast.installments)}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500">Despesas Fixas:</span>
+                <span className="font-bold">{formatCurrency(nextMonthForecast.fixed)}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500">Cartão:</span>
+                <span className="font-bold">{formatCurrency(nextMonthForecast.cards)}</span>
+              </div>
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-slate-500 font-bold">Total Previsto:</span>
+                  <span className="font-bold text-red-500">{formatCurrency(nextMonthForecast.total)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-500 font-bold">Sobra Prevista:</span>
+                  <span className={cn("font-bold", nextMonthForecast.remaining >= 0 ? "text-emerald-500" : "text-red-500")}>
+                    {formatCurrency(nextMonthForecast.remaining)}
+                  </span>
+                </div>
+              </div>
             </div>
-            <button 
-              onClick={() => alert('Configure as porcentagens na aba de Configurações')}
-              className="w-full mt-6 py-2 text-sm font-medium text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-xl transition-all"
-            >
-              Ajustar Porcentagens
-            </button>
           </div>
 
-          <div className="bg-gradient-to-br from-emerald-500 to-teal-600 p-6 rounded-3xl text-white shadow-lg shadow-emerald-500/20">
-            <h3 className="text-lg font-bold mb-2">Dica da IA</h3>
-            <p className="text-emerald-50 text-sm leading-relaxed">
-              Você está economizando {((stats.goals + stats.investments + stats.crypto) / stats.salary * 100 || 0).toFixed(1)}% do seu salário. 
-              Excelente progresso! Tente manter acima de 20% para liberdade financeira.
-            </p>
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <ArrowUpRight className="w-5 h-5 text-blue-500" />
+              Parcelas Futuras
+            </h3>
+            <div className="space-y-3">
+              {futureInstallments.length > 0 ? futureInstallments.map(([month, value]) => (
+                <div key={month} className="flex justify-between items-center p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                  <span className="text-sm font-medium">{month}</span>
+                  <span className="font-bold">{formatCurrency(value)}</span>
+                </div>
+              )) : (
+                <p className="text-sm text-slate-400 text-center py-4">Sem parcelas futuras.</p>
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -29,9 +29,7 @@ import GoalsTab from './components/GoalsTab';
 import InvestmentsTab from './components/InvestmentsTab';
 import CryptoTab from './components/CryptoTab';
 import CardTab from './components/CardTab';
-import NewsTab from './components/NewsTab';
 import SettingsTab from './components/SettingsTab';
-import ChatBot from './components/ChatBot';
 import LoginScreen from './components/LoginScreen';
 import ExpensesTab from './components/ExpensesTab';
 
@@ -71,8 +69,6 @@ export default function App() {
     { id: 'investimentos', label: 'Investimentos', icon: TrendingUp },
     { id: 'cripto', label: 'Cripto', icon: Coins },
     { id: 'cartao', label: 'Cartão', icon: CreditCard },
-    { id: 'noticias', label: 'Notícias', icon: Newspaper },
-    { id: 'chat', label: 'IA Chat', icon: MessageSquare },
     { id: 'config', label: 'Configurações', icon: Settings },
   ];
 
@@ -84,8 +80,6 @@ export default function App() {
       case 'investimentos': return <InvestmentsTab state={state} updateState={updateState} />;
       case 'cripto': return <CryptoTab state={state} updateState={updateState} />;
       case 'cartao': return <CardTab state={state} updateState={updateState} />;
-      case 'noticias': return <NewsTab />;
-      case 'chat': return <ChatBot />;
       case 'config': return <SettingsTab state={state} updateState={updateState} />;
       default: return <Dashboard state={state} updateState={updateState} />;
     }

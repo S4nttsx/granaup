@@ -1,6 +1,6 @@
 import { LucideIcon } from 'lucide-react';
 
-export type TabType = 'dashboard' | 'metas' | 'investimentos' | 'cripto' | 'cartao' | 'noticias' | 'config' | 'chat' | 'despesas';
+export type TabType = 'dashboard' | 'metas' | 'investimentos' | 'cripto' | 'cartao' | 'config' | 'despesas';
 
 export interface User {
   name: string;
@@ -40,6 +40,7 @@ export interface CreditCard {
   limit: number;
   currentBill: number;
   dueDate: string;
+  number?: string;
 }
 
 export interface Transaction {
@@ -51,6 +52,10 @@ export interface Transaction {
   date: string;
   recurrence?: 'none' | 'weekly' | 'monthly' | 'yearly';
   parentTransactionId?: string;
+  installments?: {
+    total: number;
+    current: number;
+  };
 }
 
 export interface AppState {

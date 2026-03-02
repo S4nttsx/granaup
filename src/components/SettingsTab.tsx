@@ -89,6 +89,32 @@ export default function SettingsTab({ state, updateState }: SettingsTabProps) {
           </div>
         </section>
 
+        {/* Appearance Section */}
+        <section className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+          <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+            {state.darkMode ? <Moon className="w-5 h-5 text-emerald-500" /> : <Sun className="w-5 h-5 text-emerald-500" />}
+            Aparência
+          </h3>
+          <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl">
+            <div>
+              <p className="font-bold">Modo Escuro</p>
+              <p className="text-sm text-slate-500">Alterne entre o tema claro e escuro.</p>
+            </div>
+            <button 
+              onClick={() => updateState({ darkMode: !state.darkMode })}
+              className={cn(
+                "w-14 h-8 rounded-full transition-all relative",
+                state.darkMode ? "bg-emerald-500" : "bg-slate-300"
+              )}
+            >
+              <motion.div 
+                animate={{ x: state.darkMode ? 24 : 4 }}
+                className="w-6 h-6 bg-white rounded-full absolute top-1 shadow-sm"
+              />
+            </button>
+          </div>
+        </section>
+
         {/* Financial Config */}
         <section className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
           <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
