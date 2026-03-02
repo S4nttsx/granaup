@@ -26,10 +26,10 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
       >
         <div className="p-8">
           <div className="flex flex-col items-center mb-8">
-            <div className="w-16 h-16 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-xl shadow-emerald-500/20 mb-4">
+            <div className="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center shadow-xl shadow-blue-500/20 mb-4">
               <Wallet className="text-white w-10 h-10" />
             </div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">GranaUp</h1>
+            <h1 className="text-3xl font-bold text-blue-600 dark:text-white">GranaUp</h1>
             <p className="text-slate-500 dark:text-slate-400 mt-2 text-center">
               {isRegistering ? 'Crie sua conta para começar' : 'Bem-vindo de volta ao seu controle financeiro'}
             </p>
@@ -44,7 +44,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
                   placeholder="Seu Nome"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                  className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                   required
                 />
               </div>
@@ -56,7 +56,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
                 placeholder="E-mail"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                 required
               />
             </div>
@@ -67,14 +67,14 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
                 placeholder="Senha"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                 required
               />
             </div>
 
             <button
               type="submit"
-              className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition-all active:scale-95"
+              className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-95"
             >
               {isRegistering ? 'Criar Conta' : 'Entrar'}
             </button>
@@ -101,7 +101,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
               {isRegistering ? 'Já tem uma conta?' : 'Não tem uma conta?'}
               <button
                 onClick={() => setIsRegistering(!isRegistering)}
-                className="ml-1 text-emerald-500 font-bold hover:underline"
+                className="ml-1 text-blue-500 font-bold hover:underline"
               >
                 {isRegistering ? 'Faça login' : 'Cadastre-se'}
               </button>

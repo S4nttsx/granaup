@@ -46,12 +46,12 @@ export default function CryptoTab({ state, updateState }: CryptoTabProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold">Criptomoedas</h2>
+          <h2 className="text-3xl font-bold text-blue-600 dark:text-white">Criptomoedas</h2>
           <p className="text-slate-500">Acompanhe seus ativos digitais em tempo real.</p>
         </div>
         <button 
           onClick={() => setIsAdding(true)}
-          className="flex items-center gap-2 px-6 py-3 bg-amber-500 text-white font-bold rounded-2xl shadow-lg shadow-amber-500/20 hover:bg-amber-600 transition-all active:scale-95"
+          className="flex items-center gap-2 px-6 py-3 bg-blue-500 text-white font-bold rounded-2xl shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-all active:scale-95"
         >
           <Plus className="w-5 h-5" />
           Adicionar Moeda
@@ -66,7 +66,7 @@ export default function CryptoTab({ state, updateState }: CryptoTabProps) {
         </div>
         <div className="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
           <p className="text-sm text-slate-500 font-medium">Valor de Mercado</p>
-          <p className="text-2xl font-bold text-amber-500">{formatCurrency(totalCurrent)}</p>
+          <p className="text-2xl font-bold text-blue-500">{formatCurrency(totalCurrent)}</p>
         </div>
         <div className="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
           <p className="text-sm text-slate-500 font-medium">Lucro/Prejuízo</p>
@@ -83,48 +83,48 @@ export default function CryptoTab({ state, updateState }: CryptoTabProps) {
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-6 bg-white dark:bg-slate-900 rounded-3xl border-2 border-amber-500/30 shadow-xl"
+          className="p-6 bg-white dark:bg-slate-900 rounded-3xl border-2 border-blue-500/30 shadow-xl"
         >
-          <h3 className="text-xl font-bold mb-4">Nova Criptomoeda</h3>
+          <h3 className="text-xl font-bold mb-4 text-blue-600 dark:text-white">Nova Criptomoeda</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
             <input
               type="text"
               placeholder="Nome (ex: Bitcoin)"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-amber-500"
+              className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
             />
             <input
               type="text"
               placeholder="Símbolo (ex: BTC)"
               value={symbol}
               onChange={(e) => setSymbol(e.target.value)}
-              className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-amber-500"
+              className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
             />
             <input
               type="number"
               placeholder="Quantidade"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-amber-500"
+              className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
             />
             <input
               type="number"
               placeholder="Total Investido (R$)"
               value={invested}
               onChange={(e) => setInvested(e.target.value)}
-              className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-amber-500"
+              className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
             />
             <input
               type="number"
               placeholder="Preço Atual (R$)"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
-              className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-amber-500"
+              className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div className="flex gap-3">
-            <button onClick={addCrypto} className="px-6 py-2 bg-amber-500 text-white font-bold rounded-xl">Salvar</button>
+            <button onClick={addCrypto} className="px-6 py-2 bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-all">Salvar</button>
             <button onClick={() => setIsAdding(false)} className="px-6 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold rounded-xl">Cancelar</button>
           </div>
         </motion.div>

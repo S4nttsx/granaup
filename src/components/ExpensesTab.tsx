@@ -11,7 +11,10 @@ import {
   PieChart as PieChartIcon,
   Save,
   X,
-  RefreshCw
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight,
+  CreditCard as CreditCardIcon
 } from 'lucide-react';
 import { 
   PieChart, 
@@ -24,7 +27,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { AppState, Transaction } from '../types';
+import { AppState, Transaction, PaymentMethod } from '../types';
 import { CATEGORIES } from '../constants';
 
 interface ExpensesTabProps {
@@ -37,9 +40,20 @@ function cn(...inputs: ClassValue[]) {
 }
 
 export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [isAddingExpense, setIsAddingExpense] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Transaction | null>(null);
   
+  const currentMonthName = selectedDate.toLocaleString('pt-BR', { month: 'long' });
+  const capitalizedMonth = currentMonthName.charAt(0).toUpperCase() + currentMonthName.slice(1);
+  const currentYear = selectedDate.getFullYear();
+
+  const changeMonth = (offset: number) => {
+    const newDate = new Date(selectedDate);
+    newDate.setMonth(newDate.getMonth() + offset);
+    setSelectedDate(newDate);
+  };
+
   // Salary form state
   const [salaryInput, setSalaryInput] = useState(state.salary.toString());
   const [salaryDateInput, setSalaryDateInput] = useState(state.salaryDate || '');
@@ -52,6 +66,8 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
   const [expenseDate, setExpenseDate] = useState(new Date().toISOString().split('T')[0]);
   const [expenseRecurrence, setExpenseRecurrence] = useState<Transaction['recurrence']>('none');
   const [expenseInstallments, setExpenseInstallments] = useState('1');
+  const [expensePaymentMethod, setExpensePaymentMethod] = useState<PaymentMethod>('dinheiro');
+  const [expenseCardId, setExpenseCardId] = useState('');
 
   // Process recurring expenses on mount
   useEffect(() => {
@@ -104,18 +120,44 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
   }, []);
 
   const stats = useMemo(() => {
-    const totalExpenses = state.transactions
+    const month = selectedDate.getMonth();
+    const year = selectedDate.getFullYear();
+
+    const getMonthlyValue = (t: Transaction) => {
+      const tDate = new Date(t.date);
+      const tMonth = tDate.getMonth();
+      const tYear = tDate.getFullYear();
+
+      if (!t.installments || t.installments.total <= 1) {
+        return (tMonth === month && tYear === year) ? t.amount : 0;
+      } else {
+        const totalInstallments = t.installments.total;
+        const installmentValue = t.amount / totalInstallments;
+        const startTotalMonths = tYear * 12 + tMonth;
+        const targetTotalMonths = year * 12 + month;
+        const diff = targetTotalMonths - startTotalMonths;
+        if (diff >= 0 && diff < totalInstallments) return installmentValue;
+        return 0;
+      }
+    };
+
+    const monthlyTransactions = state.transactions
+      .map(t => ({ ...t, monthlyAmount: getMonthlyValue(t) }))
+      .filter(t => t.monthlyAmount > 0);
+
+    const totalExpenses = monthlyTransactions
       .filter(t => t.type === 'expense')
-      .reduce((acc, t) => acc + t.amount, 0);
+      .reduce((acc, t) => acc + t.monthlyAmount, 0);
     
     const remaining = state.salary - totalExpenses;
 
     return {
       salary: state.salary,
       expenses: totalExpenses,
-      remaining
+      remaining,
+      monthlyTransactions
     };
-  }, [state]);
+  }, [state, selectedDate]);
 
   const chartData = [
     { name: 'Gasto', value: stats.expenses, color: '#ef4444' },
@@ -138,22 +180,41 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
     if (!expenseName || !expenseValue) return;
     
     const installmentsTotal = parseInt(expenseInstallments) || 1;
+    const totalAmount = parseFloat(expenseValue);
     
     const newExpense: Transaction = {
       id: Date.now().toString(),
       description: expenseName,
-      amount: parseFloat(expenseValue),
+      amount: totalAmount,
       type: 'expense',
       category: expenseCategory,
       date: new Date(expenseDate).toISOString(),
       recurrence: expenseRecurrence,
+      paymentMethod: expensePaymentMethod,
+      cardId: expensePaymentMethod === 'credito' ? expenseCardId : undefined,
       installments: installmentsTotal > 1 ? {
         total: installmentsTotal,
         current: 1
       } : undefined
     };
 
-    updateState({ transactions: [newExpense, ...state.transactions] });
+    let updatedCards = [...state.cards];
+    if (expensePaymentMethod === 'credito' && expenseCardId) {
+      updatedCards = state.cards.map(c => {
+        if (c.id === expenseCardId) {
+          return {
+            ...c,
+            currentBill: c.currentBill + totalAmount
+          };
+        }
+        return c;
+      });
+    }
+
+    updateState({ 
+      transactions: [newExpense, ...state.transactions],
+      cards: updatedCards
+    });
     resetExpenseForm();
   };
 
@@ -165,6 +226,8 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
     setExpenseDate(new Date(expense.date).toISOString().split('T')[0]);
     setExpenseRecurrence(expense.recurrence || 'none');
     setExpenseInstallments(expense.installments?.total.toString() || '1');
+    setExpensePaymentMethod(expense.paymentMethod || 'dinheiro');
+    setExpenseCardId(expense.cardId || '');
     setIsAddingExpense(true);
   };
 
@@ -172,16 +235,40 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
     if (!editingExpense || !expenseName || !expenseValue) return;
 
     const installmentsTotal = parseInt(expenseInstallments) || 1;
+    const totalAmount = parseFloat(expenseValue);
+
+    // Revert old card bill if it was credit
+    let updatedCards = [...state.cards];
+    if (editingExpense.paymentMethod === 'credito' && editingExpense.cardId) {
+      updatedCards = updatedCards.map(c => {
+        if (c.id === editingExpense.cardId) {
+          return { ...c, currentBill: Math.max(0, c.currentBill - editingExpense.amount) };
+        }
+        return c;
+      });
+    }
+
+    // Apply new card bill if it is credit
+    if (expensePaymentMethod === 'credito' && expenseCardId) {
+      updatedCards = updatedCards.map(c => {
+        if (c.id === expenseCardId) {
+          return { ...c, currentBill: c.currentBill + totalAmount };
+        }
+        return c;
+      });
+    }
 
     const updatedTransactions = state.transactions.map(t => 
       t.id === editingExpense.id 
         ? { 
             ...t, 
             description: expenseName, 
-            amount: parseFloat(expenseValue), 
+            amount: totalAmount, 
             category: expenseCategory, 
             date: new Date(expenseDate).toISOString(),
             recurrence: expenseRecurrence,
+            paymentMethod: expensePaymentMethod,
+            cardId: expensePaymentMethod === 'credito' ? expenseCardId : undefined,
             installments: installmentsTotal > 1 ? {
               total: installmentsTotal,
               current: t.installments?.current || 1
@@ -190,7 +277,10 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
         : t
     );
 
-    updateState({ transactions: updatedTransactions });
+    updateState({ 
+      transactions: updatedTransactions,
+      cards: updatedCards
+    });
     resetExpenseForm();
   };
 
@@ -201,12 +291,27 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
     setExpenseDate(new Date().toISOString().split('T')[0]);
     setExpenseRecurrence('none');
     setExpenseInstallments('1');
+    setExpensePaymentMethod('dinheiro');
+    setExpenseCardId('');
     setIsAddingExpense(false);
     setEditingExpense(null);
   };
 
-  const deleteExpense = (id: string) => {
-    updateState({ transactions: state.transactions.filter(t => t.id !== id) });
+  const deleteExpense = (expense: Transaction) => {
+    let updatedCards = [...state.cards];
+    if (expense.paymentMethod === 'credito' && expense.cardId) {
+      updatedCards = updatedCards.map(c => {
+        if (c.id === expense.cardId) {
+          return { ...c, currentBill: Math.max(0, c.currentBill - expense.amount) };
+        }
+        return c;
+      });
+    }
+
+    updateState({ 
+      transactions: state.transactions.filter(t => t.id !== expense.id),
+      cards: updatedCards
+    });
   };
 
   const getRecurrenceLabel = (r?: string) => {
@@ -220,14 +325,29 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-3xl font-bold">Salário e Despesas</h2>
-          <p className="text-slate-500">Controle seu fluxo de caixa mensal.</p>
+      {/* Month Navigation */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white dark:bg-slate-900 p-4 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => changeMonth(-1)}
+            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all text-blue-600 dark:text-slate-400"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          <div className="flex flex-col items-center min-w-[150px]">
+            <span className="text-xl font-bold text-blue-600 dark:text-white">{capitalizedMonth}</span>
+            <span className="text-xs text-slate-500 font-medium">{currentYear}</span>
+          </div>
+          <button 
+            onClick={() => changeMonth(1)}
+            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all text-blue-600 dark:text-slate-400"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
         </div>
         <div className="flex items-center gap-4">
-          <div className="p-4 bg-emerald-500/10 text-emerald-500 rounded-2xl border border-emerald-500/20">
-            <p className="text-xs font-bold uppercase">Restante</p>
+          <div className="p-4 bg-blue-500/10 text-blue-500 rounded-2xl border border-blue-500/20">
+            <p className="text-xs font-bold uppercase">Restante em {capitalizedMonth}</p>
             <p className="text-xl font-bold">{formatCurrency(stats.remaining)}</p>
           </div>
         </div>
@@ -241,8 +361,8 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
             animate={{ opacity: 1, x: 0 }}
             className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm"
           >
-            <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-              <DollarSign className="w-5 h-5 text-emerald-500" />
+            <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-blue-600 dark:text-white">
+              <DollarSign className="w-5 h-5 text-blue-500" />
               Meu Salário
             </h3>
             <div className="space-y-4">
@@ -254,7 +374,7 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
                     type="number" 
                     value={salaryInput}
                     onChange={(e) => setSalaryInput(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
@@ -267,7 +387,7 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
                     placeholder="Ex: 05"
                     value={salaryDateInput}
                     onChange={(e) => setSalaryDateInput(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
@@ -277,12 +397,12 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
                   placeholder="Ex: Pagamento do trabalho principal"
                   value={salaryObsInput}
                   onChange={(e) => setSalaryObsInput(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 min-h-[80px]"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px]"
                 />
               </div>
               <button 
                 onClick={handleSaveSalary}
-                className="w-full py-3 bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 transition-all flex items-center justify-center gap-2"
+                className="w-full py-3 bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-all flex items-center justify-center gap-2"
               >
                 <Save className="w-5 h-5" />
                 Salvar Salário
@@ -292,8 +412,8 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
 
           {/* Mini Chart */}
           <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
-            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-              <PieChartIcon className="w-5 h-5 text-emerald-500" />
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-blue-600 dark:text-white">
+              <PieChartIcon className="w-5 h-5 text-blue-500" />
               Resumo
             </h3>
             <div className="h-[200px] w-full">
@@ -415,6 +535,36 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
                     />
                   </div>
                   <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500 uppercase">Forma de Pagamento</label>
+                    <select
+                      value={expensePaymentMethod}
+                      onChange={(e) => setExpensePaymentMethod(e.target.value as PaymentMethod)}
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-red-500"
+                    >
+                      <option value="dinheiro">Dinheiro</option>
+                      <option value="pix">Pix</option>
+                      <option value="debito">Débito</option>
+                      <option value="credito">Crédito</option>
+                      <option value="transferencia">Transferência</option>
+                      <option value="outro">Outro</option>
+                    </select>
+                  </div>
+                  {expensePaymentMethod === 'credito' && (
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-slate-500 uppercase">Selecionar Cartão</label>
+                      <select
+                        value={expenseCardId}
+                        onChange={(e) => setExpenseCardId(e.target.value)}
+                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-red-500"
+                      >
+                        <option value="">Selecione um cartão</option>
+                        {state.cards.map(card => (
+                          <option key={card.id} value={card.id}>{card.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                  <div className="space-y-1">
                     <label className="text-xs font-bold text-slate-500 uppercase">Parcelas</label>
                     <input
                       type="number"
@@ -471,8 +621,8 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
               </span>
             </div>
             <div className="divide-y divide-slate-100 dark:divide-slate-800">
-              {state.transactions.filter(t => t.type === 'expense').length > 0 ? (
-                state.transactions.filter(t => t.type === 'expense').map((expense) => (
+              {stats.monthlyTransactions.filter(t => t.type === 'expense').length > 0 ? (
+                stats.monthlyTransactions.filter(t => t.type === 'expense').map((expense) => (
                   <motion.div 
                     key={expense.id}
                     layout
@@ -492,24 +642,34 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
                               {getRecurrenceLabel(expense.recurrence)}
                             </span>
                           )}
-                          {expense.installments && (
+                          {expense.installments && expense.installments.total > 1 && (
                             <span className="text-[10px] px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-500 rounded font-bold uppercase">
-                              {expense.installments.current}/{expense.installments.total}x
+                              {(() => {
+                                const tDate = new Date(expense.date);
+                                const diff = (selectedDate.getFullYear() * 12 + selectedDate.getMonth()) - (tDate.getFullYear() * 12 + tDate.getMonth());
+                                return `${diff + 1}/${expense.installments.total}`;
+                              })()}x
                             </span>
                           )}
                         </div>
                         <div className="flex items-center gap-2 text-xs text-slate-500">
                           <span className="flex items-center gap-1"><Tag className="w-3 h-3" /> {expense.category}</span>
                           <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {new Date(expense.date).toLocaleDateString('pt-BR')}</span>
+                          {expense.paymentMethod && (
+                            <span className="flex items-center gap-1 capitalize">
+                              <CreditCardIcon className="w-3 h-3" /> 
+                              {expense.paymentMethod === 'credito' ? `Cartão ${state.cards.find(c => c.id === expense.cardId)?.name || ''}` : expense.paymentMethod}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="text-right">
-                        <span className="block font-bold text-red-500">-{formatCurrency(expense.amount)}</span>
-                        {expense.installments && (
+                        <span className="block font-bold text-red-500">-{formatCurrency(expense.monthlyAmount || expense.amount)}</span>
+                        {expense.installments && expense.installments.total > 1 && (
                           <span className="text-[10px] text-slate-400 font-medium">
-                            {expense.installments.total}x de {formatCurrency(expense.amount / expense.installments.total)}
+                            Total: {formatCurrency(expense.amount)}
                           </span>
                         )}
                       </div>
@@ -521,7 +681,7 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button 
-                          onClick={() => deleteExpense(expense.id)}
+                          onClick={() => deleteExpense(expense)}
                           className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
                         >
                           <Trash2 className="w-4 h-4" />

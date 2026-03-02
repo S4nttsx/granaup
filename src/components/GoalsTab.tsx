@@ -49,12 +49,12 @@ export default function GoalsTab({ state, updateState }: GoalsTabProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold">Minhas Metas</h2>
+          <h2 className="text-3xl font-bold text-blue-600 dark:text-white">Minhas Metas</h2>
           <p className="text-slate-500">Acompanhe seu progresso e realize seus sonhos.</p>
         </div>
         <button 
           onClick={() => setIsAdding(true)}
-          className="flex items-center gap-2 px-6 py-3 bg-emerald-500 text-white font-bold rounded-2xl shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 transition-all active:scale-95"
+          className="flex items-center gap-2 px-6 py-3 bg-blue-500 text-white font-bold rounded-2xl shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-all active:scale-95"
         >
           <Plus className="w-5 h-5" />
           Nova Meta
@@ -65,29 +65,29 @@ export default function GoalsTab({ state, updateState }: GoalsTabProps) {
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-6 bg-white dark:bg-slate-900 rounded-3xl border-2 border-emerald-500/30 shadow-xl"
+          className="p-6 bg-white dark:bg-slate-900 rounded-3xl border-2 border-blue-500/30 shadow-xl"
         >
-          <h3 className="text-xl font-bold mb-4">Criar Nova Meta</h3>
+          <h3 className="text-xl font-bold mb-4 text-blue-600 dark:text-white">Criar Nova Meta</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <input
               type="text"
               placeholder="Nome da Meta (ex: Viagem, Carro)"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+              className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
             />
             <input
               type="number"
               placeholder="Valor Alvo (R$)"
               value={newTarget}
               onChange={(e) => setNewTarget(e.target.value)}
-              className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+              className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div className="flex gap-3">
             <button 
               onClick={addGoal}
-              className="px-6 py-2 bg-emerald-500 text-white font-bold rounded-xl"
+              className="px-6 py-2 bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-all"
             >
               Salvar Meta
             </button>
@@ -117,7 +117,7 @@ export default function GoalsTab({ state, updateState }: GoalsTabProps) {
                       <Target className="w-6 h-6" />
                     </div>
                     <div>
-                      <h4 className="text-lg font-bold">{goal.name}</h4>
+                      <h4 className="text-lg font-bold text-blue-600 dark:text-white">{goal.name}</h4>
                       <p className="text-sm text-slate-500">{goal.category}</p>
                     </div>
                   </div>
@@ -130,7 +130,7 @@ export default function GoalsTab({ state, updateState }: GoalsTabProps) {
 
                 <div className="space-y-4">
                   <div className="flex justify-between text-sm font-bold">
-                    <span>{formatCurrency(goal.currentValue)}</span>
+                    <span className="text-blue-600 dark:text-white">{formatCurrency(goal.currentValue)}</span>
                     <span className="text-slate-400">de {formatCurrency(goal.targetValue)}</span>
                   </div>
                   

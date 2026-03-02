@@ -63,8 +63,8 @@ export default function SettingsTab({ state, updateState }: SettingsTabProps) {
       <div className="grid grid-cols-1 gap-6">
         {/* Profile Section */}
         <section className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-            <User className="w-5 h-5 text-emerald-500" />
+          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-blue-600 dark:text-white">
+            <User className="w-5 h-5 text-blue-500" />
             Perfil do Usuário
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -74,7 +74,7 @@ export default function SettingsTab({ state, updateState }: SettingsTabProps) {
                 type="text" 
                 value={state.user.name}
                 onChange={(e) => updateState({ user: { ...state.user, name: e.target.value } })}
-                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div className="space-y-2">
@@ -83,7 +83,7 @@ export default function SettingsTab({ state, updateState }: SettingsTabProps) {
                 type="email" 
                 value={state.user.email}
                 onChange={(e) => updateState({ user: { ...state.user, email: e.target.value } })}
-                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
@@ -91,34 +91,42 @@ export default function SettingsTab({ state, updateState }: SettingsTabProps) {
 
         {/* Appearance Section */}
         <section className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-            {state.darkMode ? <Moon className="w-5 h-5 text-emerald-500" /> : <Sun className="w-5 h-5 text-emerald-500" />}
+          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-blue-600 dark:text-white">
+            <Sun className="w-5 h-5 text-blue-500" />
             Aparência
           </h3>
-          <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl">
-            <div>
-              <p className="font-bold">Modo Escuro</p>
-              <p className="text-sm text-slate-500">Alterne entre o tema claro e escuro.</p>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <button 
-              onClick={() => updateState({ darkMode: !state.darkMode })}
+              onClick={() => updateState({ darkMode: false })}
               className={cn(
-                "w-14 h-8 rounded-full transition-all relative",
-                state.darkMode ? "bg-emerald-500" : "bg-slate-300"
+                "flex items-center justify-center gap-3 px-6 py-4 rounded-2xl font-bold transition-all border-2",
+                !state.darkMode 
+                  ? "bg-blue-500 text-white border-blue-500 shadow-lg shadow-blue-500/20" 
+                  : "bg-slate-50 text-slate-600 border-slate-200 hover:border-blue-500"
               )}
             >
-              <motion.div 
-                animate={{ x: state.darkMode ? 24 : 4 }}
-                className="w-6 h-6 bg-white rounded-full absolute top-1 shadow-sm"
-              />
+              <Sun className="w-5 h-5" />
+              Tema Claro
+            </button>
+            <button 
+              onClick={() => updateState({ darkMode: true })}
+              className={cn(
+                "flex items-center justify-center gap-3 px-6 py-4 rounded-2xl font-bold transition-all border-2",
+                state.darkMode 
+                  ? "bg-slate-800 text-white border-slate-700 shadow-lg shadow-black/20" 
+                  : "bg-slate-50 text-slate-600 border-slate-200 hover:border-slate-800"
+              )}
+            >
+              <Moon className="w-5 h-5" />
+              Tema Escuro
             </button>
           </div>
         </section>
 
         {/* Financial Config */}
         <section className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-            <Percent className="w-5 h-5 text-emerald-500" />
+          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-blue-600 dark:text-white">
+            <Percent className="w-5 h-5 text-blue-500" />
             Distribuição do Salário
           </h3>
           <p className="text-sm text-slate-500 mb-6">Defina como seu salário deve ser dividido automaticamente.</p>
@@ -144,12 +152,12 @@ export default function SettingsTab({ state, updateState }: SettingsTabProps) {
               onChange={(v) => updateState({ distribution: { ...state.distribution, crypto: v } })}
             />
           </div>
-          <div className="mt-6 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl flex items-center justify-between">
-            <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">Total:</span>
+          <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-between">
+            <span className="text-sm font-bold text-blue-600 dark:text-blue-400">Total:</span>
             <span className={cn(
               "font-bold",
               (state.distribution.expenses + state.distribution.goals + state.distribution.investments + state.distribution.crypto) === 100 
-                ? "text-emerald-600 dark:text-emerald-400" 
+                ? "text-blue-600 dark:text-blue-400" 
                 : "text-red-500"
             )}>
               {state.distribution.expenses + state.distribution.goals + state.distribution.investments + state.distribution.crypto}%
@@ -159,8 +167,8 @@ export default function SettingsTab({ state, updateState }: SettingsTabProps) {
 
         {/* Data Management */}
         <section className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-            <Shield className="w-5 h-5 text-emerald-500" />
+          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-blue-600 dark:text-white">
+            <Shield className="w-5 h-5 text-blue-500" />
             Gerenciamento de Dados
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -199,7 +207,7 @@ function PercentInput({ label, value, onChange }: any) {
           type="number" 
           value={value}
           onChange={(e) => onChange(parseInt(e.target.value) || 0)}
-          className="w-full pl-4 pr-8 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+          className="w-full pl-4 pr-8 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
         />
         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">%</span>
       </div>

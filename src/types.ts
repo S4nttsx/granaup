@@ -43,18 +43,22 @@ export interface CreditCard {
   number?: string;
 }
 
+export type PaymentMethod = 'dinheiro' | 'pix' | 'debito' | 'credito' | 'transferencia' | 'outro';
+
 export interface Transaction {
   id: string;
   description: string;
-  amount: number;
+  amount: number; // Total amount for installments, or single amount for others
   type: 'expense' | 'income';
   category: string;
   date: string;
   recurrence?: 'none' | 'weekly' | 'monthly' | 'yearly';
   parentTransactionId?: string;
+  paymentMethod?: PaymentMethod;
+  cardId?: string;
   installments?: {
     total: number;
-    current: number;
+    current: number; // This might be redundant if we calculate based on date, but let's keep it for compatibility or specific overrides
   };
 }
 

@@ -80,12 +80,12 @@ export default function CardTab({ state, updateState }: CardTabProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold">Cartões de Crédito</h2>
+          <h2 className="text-3xl font-bold text-blue-600 dark:text-white">Cartões de Crédito</h2>
           <p className="text-slate-500">Gerencie seus limites e faturas em um só lugar.</p>
         </div>
         <button 
           onClick={() => setIsAdding(true)}
-          className="flex items-center gap-2 px-6 py-3 bg-violet-500 text-white font-bold rounded-2xl shadow-lg shadow-violet-500/20 hover:bg-violet-600 transition-all active:scale-95"
+          className="flex items-center gap-2 px-6 py-3 bg-blue-500 text-white font-bold rounded-2xl shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-all active:scale-95"
         >
           <Plus className="w-5 h-5" />
           Novo Cartão
@@ -98,10 +98,10 @@ export default function CardTab({ state, updateState }: CardTabProps) {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="p-6 bg-white dark:bg-slate-900 rounded-3xl border-2 border-violet-500/30 shadow-xl"
+            className="p-6 bg-white dark:bg-slate-900 rounded-3xl border-2 border-blue-500/30 shadow-xl"
           >
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold">{editingCard ? 'Editar Cartão' : 'Novo Cartão'}</h3>
+              <h3 className="text-xl font-bold text-blue-600 dark:text-white">{editingCard ? 'Editar Cartão' : 'Novo Cartão'}</h3>
               <button onClick={resetForm} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl">
                 <X className="w-5 h-5" />
               </button>
@@ -114,7 +114,7 @@ export default function CardTab({ state, updateState }: CardTabProps) {
                   placeholder="Ex: Nubank, Inter"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div className="space-y-1">
@@ -124,7 +124,7 @@ export default function CardTab({ state, updateState }: CardTabProps) {
                   placeholder="0.00"
                   value={limit}
                   onChange={(e) => setLimit(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div className="space-y-1">
@@ -134,7 +134,7 @@ export default function CardTab({ state, updateState }: CardTabProps) {
                   placeholder="0.00"
                   value={bill}
                   onChange={(e) => setBill(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div className="space-y-1">
@@ -144,7 +144,7 @@ export default function CardTab({ state, updateState }: CardTabProps) {
                   placeholder="Ex: 15"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div className="space-y-1 md:col-span-2">
@@ -190,15 +190,15 @@ export default function CardTab({ state, updateState }: CardTabProps) {
                 className="relative overflow-hidden p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all group"
               >
                 {/* Visual Card Decoration */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-violet-500/5 rounded-full -mr-16 -mt-16 blur-2xl" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -mr-16 -mt-16 blur-2xl" />
                 
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-violet-500 text-white rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/20">
+                    <div className="w-12 h-12 bg-blue-500 text-white rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
                       <CreditCard className="w-6 h-6" />
                     </div>
                     <div>
-                      <h4 className="text-xl font-bold">{card.name}</h4>
+                      <h4 className="text-xl font-bold text-blue-600 dark:text-white">{card.name}</h4>
                       <p className="text-xs text-slate-400 font-mono tracking-widest mb-1">{maskCardNumber(card.number)}</p>
                       <p className="text-sm text-slate-500">Vencimento dia {card.dueDate}</p>
                     </div>
@@ -235,7 +235,7 @@ export default function CardTab({ state, updateState }: CardTabProps) {
                       animate={{ width: `${usagePercent}%` }}
                       className={cn(
                         "h-full rounded-full transition-all duration-500",
-                        usagePercent > 80 ? "bg-red-500" : usagePercent > 50 ? "bg-amber-500" : "bg-violet-500"
+                        usagePercent > 80 ? "bg-red-500" : usagePercent > 50 ? "bg-amber-500" : "bg-blue-500"
                       )}
                     />
                   </div>
