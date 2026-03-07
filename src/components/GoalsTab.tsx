@@ -10,22 +10,45 @@ interface GoalsTabProps {
 
 export default function GoalsTab({ state, updateState }: GoalsTabProps) {
   const [isAdding, setIsAdding] = useState(false);
+  const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
   const [newName, setNewName] = useState('');
   const [newTarget, setNewTarget] = useState('');
 
-  const addGoal = () => {
-    if (!newName || !newTarget) return;
-    const goal: Goal = {
-      id: Date.now().toString(),
-      name: newName,
-      targetValue: parseFloat(newTarget),
-      currentValue: 0,
-      category: 'Geral'
-    };
-    updateState({ goals: [...state.goals, goal] });
+  const resetForm = () => {
     setNewName('');
     setNewTarget('');
     setIsAdding(false);
+    setEditingGoal(null);
+  };
+
+  const handleSaveGoal = () => {
+    if (!newName || !newTarget) return;
+    
+    if (editingGoal) {
+      const updatedGoals = state.goals.map(g => 
+        g.id === editingGoal.id 
+          ? { ...g, name: newName, targetValue: parseFloat(newTarget) } 
+          : g
+      );
+      updateState({ goals: updatedGoals });
+    } else {
+      const goal: Goal = {
+        id: Date.now().toString(),
+        name: newName,
+        targetValue: parseFloat(newTarget),
+        currentValue: 0,
+        category: 'Geral'
+      };
+      updateState({ goals: [...state.goals, goal] });
+    }
+    resetForm();
+  };
+
+  const handleEdit = (goal: Goal) => {
+    setEditingGoal(goal);
+    setNewName(goal.name);
+    setNewTarget(goal.targetValue.toString());
+    setIsAdding(true);
   };
 
   const deleteGoal = (id: string) => {
@@ -67,7 +90,9 @@ export default function GoalsTab({ state, updateState }: GoalsTabProps) {
           animate={{ opacity: 1, y: 0 }}
           className="p-6 bg-white dark:bg-slate-900 rounded-3xl border-2 border-blue-500/30 shadow-xl"
         >
-          <h3 className="text-xl font-bold mb-4 text-blue-600 dark:text-white">Criar Nova Meta</h3>
+          <h3 className="text-xl font-bold mb-4 text-blue-600 dark:text-white">
+            {editingGoal ? 'Editar Meta' : 'Criar Nova Meta'}
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <input
               type="text"
@@ -86,13 +111,13 @@ export default function GoalsTab({ state, updateState }: GoalsTabProps) {
           </div>
           <div className="flex gap-3">
             <button 
-              onClick={addGoal}
+              onClick={handleSaveGoal}
               className="px-6 py-2 bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-all"
             >
-              Salvar Meta
+              {editingGoal ? 'Atualizar Meta' : 'Salvar Meta'}
             </button>
             <button 
-              onClick={() => setIsAdding(false)}
+              onClick={resetForm}
               className="px-6 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold rounded-xl"
             >
               Cancelar
@@ -122,6 +147,9 @@ export default function GoalsTab({ state, updateState }: GoalsTabProps) {
                     </div>
                   </div>
                   <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onClick={() => handleEdit(goal)} className="p-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg">
+                      <Edit2 className="w-5 h-5" />
+                    </button>
                     <button onClick={() => deleteGoal(goal.id)} className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
                       <Trash2 className="w-5 h-5" />
                     </button>

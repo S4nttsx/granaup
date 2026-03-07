@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Coins, Trash2, ArrowUpRight, ArrowDownRight, Search } from 'lucide-react';
+import { Plus, Coins, Trash2, ArrowUpRight, ArrowDownRight, Search, Edit2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { AppState, Crypto } from '../types';
 
@@ -10,25 +10,62 @@ interface CryptoTabProps {
 
 export default function CryptoTab({ state, updateState }: CryptoTabProps) {
   const [isAdding, setIsAdding] = useState(false);
+  const [editingCrypto, setEditingCrypto] = useState<Crypto | null>(null);
   const [name, setName] = useState('');
   const [symbol, setSymbol] = useState('');
   const [amount, setAmount] = useState('');
   const [invested, setInvested] = useState('');
   const [price, setPrice] = useState('');
 
-  const addCrypto = () => {
-    if (!name || !amount || !invested || !price) return;
-    const crypto: Crypto = {
-      id: Date.now().toString(),
-      name,
-      symbol: symbol.toUpperCase() || name.substring(0, 3).toUpperCase(),
-      amount: parseFloat(amount),
-      investedValue: parseFloat(invested),
-      currentPrice: parseFloat(price)
-    };
-    updateState({ cryptos: [...state.cryptos, crypto] });
+  const resetForm = () => {
+    setName('');
+    setSymbol('');
+    setAmount('');
+    setInvested('');
+    setPrice('');
     setIsAdding(false);
-    setName(''); setSymbol(''); setAmount(''); setInvested(''); setPrice('');
+    setEditingCrypto(null);
+  };
+
+  const handleSaveCrypto = () => {
+    if (!name || !amount || !invested || !price) return;
+    
+    if (editingCrypto) {
+      const updatedCryptos = state.cryptos.map(c => 
+        c.id === editingCrypto.id 
+          ? { 
+              ...c, 
+              name, 
+              symbol: symbol.toUpperCase() || name.substring(0, 3).toUpperCase(),
+              amount: parseFloat(amount),
+              investedValue: parseFloat(invested),
+              currentPrice: parseFloat(price)
+            } 
+          : c
+      );
+      updateState({ cryptos: updatedCryptos });
+    } else {
+      const crypto: Crypto = {
+        id: Date.now().toString(),
+        name,
+        symbol: symbol.toUpperCase() || name.substring(0, 3).toUpperCase(),
+        amount: parseFloat(amount),
+        investedValue: parseFloat(invested),
+        currentPrice: parseFloat(price)
+      };
+      updateState({ cryptos: [...state.cryptos, crypto] });
+    }
+    resetForm();
+  };
+
+  const handleEdit = (crypto: Crypto) => {
+    setEditingCrypto(crypto);
+    setName(crypto.name);
+    setSymbol(crypto.symbol);
+    setAmount(crypto.amount.toString());
+    setInvested(crypto.investedValue.toString());
+    setPrice(crypto.currentPrice.toString());
+    setIsAdding(true);
   };
 
   const deleteCrypto = (id: string) => {
@@ -85,7 +122,9 @@ export default function CryptoTab({ state, updateState }: CryptoTabProps) {
           animate={{ opacity: 1, y: 0 }}
           className="p-6 bg-white dark:bg-slate-900 rounded-3xl border-2 border-blue-500/30 shadow-xl"
         >
-          <h3 className="text-xl font-bold mb-4 text-blue-600 dark:text-white">Nova Criptomoeda</h3>
+          <h3 className="text-xl font-bold mb-4 text-blue-600 dark:text-white">
+            {editingCrypto ? 'Editar Criptomoeda' : 'Nova Criptomoeda'}
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
             <input
               type="text"
@@ -124,8 +163,10 @@ export default function CryptoTab({ state, updateState }: CryptoTabProps) {
             />
           </div>
           <div className="flex gap-3">
-            <button onClick={addCrypto} className="px-6 py-2 bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-all">Salvar</button>
-            <button onClick={() => setIsAdding(false)} className="px-6 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold rounded-xl">Cancelar</button>
+            <button onClick={handleSaveCrypto} className="px-6 py-2 bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-all">
+              {editingCrypto ? 'Atualizar' : 'Salvar'}
+            </button>
+            <button onClick={resetForm} className="px-6 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold rounded-xl">Cancelar</button>
           </div>
         </motion.div>
       )}
@@ -153,9 +194,14 @@ export default function CryptoTab({ state, updateState }: CryptoTabProps) {
                       <p className="text-sm text-slate-500">{crypto.amount} {crypto.symbol}</p>
                     </div>
                   </div>
-                  <button onClick={() => deleteCrypto(crypto.id)} className="p-2 text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all">
-                    <Trash2 className="w-5 h-5" />
-                  </button>
+                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                    <button onClick={() => handleEdit(crypto)} className="p-2 text-slate-400 hover:text-blue-500 transition-all">
+                      <Edit2 className="w-5 h-5" />
+                    </button>
+                    <button onClick={() => deleteCrypto(crypto.id)} className="p-2 text-slate-400 hover:text-red-500 transition-all">
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="space-y-2">

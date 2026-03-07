@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, TrendingUp, Trash2, ArrowUpRight, ArrowDownRight, Briefcase } from 'lucide-react';
+import { Plus, TrendingUp, Trash2, ArrowUpRight, ArrowDownRight, Briefcase, Edit2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { AppState, Investment } from '../types';
 
@@ -10,24 +10,55 @@ interface InvestmentsTabProps {
 
 export default function InvestmentsTab({ state, updateState }: InvestmentsTabProps) {
   const [isAdding, setIsAdding] = useState(false);
+  const [editingInvestment, setEditingInvestment] = useState<Investment | null>(null);
   const [name, setName] = useState('');
   const [type, setType] = useState<Investment['type']>('CDI');
   const [value, setValue] = useState('');
 
-  const addInvestment = () => {
-    if (!name || !value) return;
-    const inv: Investment = {
-      id: Date.now().toString(),
-      name,
-      type,
-      investedValue: parseFloat(value),
-      currentValue: parseFloat(value),
-      yield: 0
-    };
-    updateState({ investments: [...state.investments, inv] });
+  const resetForm = () => {
     setName('');
     setValue('');
+    setType('CDI');
     setIsAdding(false);
+    setEditingInvestment(null);
+  };
+
+  const handleSaveInvestment = () => {
+    if (!name || !value) return;
+    
+    if (editingInvestment) {
+      const updatedInvestments = state.investments.map(i => 
+        i.id === editingInvestment.id 
+          ? { 
+              ...i, 
+              name, 
+              type, 
+              investedValue: parseFloat(value),
+              currentValue: parseFloat(value) // Resetting current value to invested for simplicity in edit
+            } 
+          : i
+      );
+      updateState({ investments: updatedInvestments });
+    } else {
+      const inv: Investment = {
+        id: Date.now().toString(),
+        name,
+        type,
+        investedValue: parseFloat(value),
+        currentValue: parseFloat(value),
+        yield: 0
+      };
+      updateState({ investments: [...state.investments, inv] });
+    }
+    resetForm();
+  };
+
+  const handleEdit = (inv: Investment) => {
+    setEditingInvestment(inv);
+    setName(inv.name);
+    setType(inv.type);
+    setValue(inv.investedValue.toString());
+    setIsAdding(true);
   };
 
   const deleteInv = (id: string) => {
@@ -84,7 +115,9 @@ export default function InvestmentsTab({ state, updateState }: InvestmentsTabPro
           animate={{ opacity: 1, y: 0 }}
           className="p-6 bg-white dark:bg-slate-900 rounded-3xl border-2 border-blue-500/30 shadow-xl"
         >
-          <h3 className="text-xl font-bold mb-4 text-blue-600 dark:text-white">Adicionar Investimento</h3>
+          <h3 className="text-xl font-bold mb-4 text-blue-600 dark:text-white">
+            {editingInvestment ? 'Editar Investimento' : 'Adicionar Investimento'}
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <input
               type="text"
@@ -113,8 +146,10 @@ export default function InvestmentsTab({ state, updateState }: InvestmentsTabPro
             />
           </div>
           <div className="flex gap-3">
-            <button onClick={addInvestment} className="px-6 py-2 bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-all">Salvar</button>
-            <button onClick={() => setIsAdding(false)} className="px-6 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold rounded-xl">Cancelar</button>
+            <button onClick={handleSaveInvestment} className="px-6 py-2 bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-all">
+              {editingInvestment ? 'Atualizar' : 'Salvar'}
+            </button>
+            <button onClick={resetForm} className="px-6 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold rounded-xl">Cancelar</button>
           </div>
         </motion.div>
       )}
@@ -159,9 +194,14 @@ export default function InvestmentsTab({ state, updateState }: InvestmentsTabPro
                         </span>
                       </td>
                       <td className="p-4 text-right">
-                        <button onClick={() => deleteInv(inv.id)} className="p-2 text-slate-400 hover:text-red-500 transition-colors">
-                          <Trash2 className="w-5 h-5" />
-                        </button>
+                        <div className="flex justify-end gap-1">
+                          <button onClick={() => handleEdit(inv)} className="p-2 text-slate-400 hover:text-blue-500 transition-colors">
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => deleteInv(inv.id)} className="p-2 text-slate-400 hover:text-red-500 transition-colors">
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
