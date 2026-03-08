@@ -315,7 +315,7 @@ export default function InvestmentsTab({ state, updateState }: InvestmentsTabPro
                 state.investments.map((inv) => {
                   const profit = inv.currentValue - inv.investedValue;
                   return (
-                    <tr key={inv.id} className="hover:bg-slate-50 dark:hover:bg-dark-hover/30 transition-colors">
+                    <tr key={inv.id} className="group hover:bg-slate-50 dark:hover:bg-dark-hover/30 transition-colors">
                       <td className="p-4">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-500 rounded-lg flex items-center justify-center">
