@@ -62,7 +62,7 @@ export default function SettingsTab({ state, updateState }: SettingsTabProps) {
 
       <div className="grid grid-cols-1 gap-6">
         {/* Profile Section */}
-        <section className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <section className="bg-white dark:bg-dark-card p-6 rounded-3xl border border-slate-200 dark:border-dark-border shadow-sm">
           <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-blue-600 dark:text-white">
             <User className="w-5 h-5 text-blue-500" />
             Perfil do Usuário
@@ -74,7 +74,7 @@ export default function SettingsTab({ state, updateState }: SettingsTabProps) {
                 type="text" 
                 value={state.user.name}
                 onChange={(e) => updateState({ user: { ...state.user, name: e.target.value } })}
-                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 bg-slate-50 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div className="space-y-2">
@@ -83,14 +83,14 @@ export default function SettingsTab({ state, updateState }: SettingsTabProps) {
                 type="email" 
                 value={state.user.email}
                 onChange={(e) => updateState({ user: { ...state.user, email: e.target.value } })}
-                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 bg-slate-50 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
         </section>
 
         {/* Appearance Section */}
-        <section className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <section className="bg-white dark:bg-dark-card p-6 rounded-3xl border border-slate-200 dark:border-dark-border shadow-sm">
           <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-blue-600 dark:text-white">
             <Sun className="w-5 h-5 text-blue-500" />
             Aparência
@@ -113,8 +113,8 @@ export default function SettingsTab({ state, updateState }: SettingsTabProps) {
               className={cn(
                 "flex items-center justify-center gap-3 px-6 py-4 rounded-2xl font-bold transition-all border-2",
                 state.darkMode 
-                  ? "bg-slate-800 text-white border-slate-700 shadow-lg shadow-black/20" 
-                  : "bg-slate-50 text-slate-600 border-slate-200 hover:border-slate-800"
+                  ? "bg-dark-hover text-white border-dark-border shadow-lg shadow-black/20" 
+                  : "bg-slate-50 text-slate-600 border-slate-200 hover:border-dark-hover"
               )}
             >
               <Moon className="w-5 h-5" />
@@ -124,7 +124,7 @@ export default function SettingsTab({ state, updateState }: SettingsTabProps) {
         </section>
 
         {/* Financial Config */}
-        <section className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <section className="bg-white dark:bg-dark-card p-6 rounded-3xl border border-slate-200 dark:border-dark-border shadow-sm">
           <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-blue-600 dark:text-white">
             <Percent className="w-5 h-5 text-blue-500" />
             Distribuição do Salário
@@ -152,7 +152,7 @@ export default function SettingsTab({ state, updateState }: SettingsTabProps) {
               onChange={(v) => updateState({ distribution: { ...state.distribution, crypto: v } })}
             />
           </div>
-          <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-between">
+          <div className="mt-6 p-4 bg-blue-50 dark:bg-dark-hover/50 rounded-2xl flex items-center justify-between">
             <span className="text-sm font-bold text-blue-600 dark:text-blue-400">Total:</span>
             <span className={cn(
               "font-bold",
@@ -166,7 +166,7 @@ export default function SettingsTab({ state, updateState }: SettingsTabProps) {
         </section>
 
         {/* Data Management */}
-        <section className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <section className="bg-white dark:bg-dark-card p-6 rounded-3xl border border-slate-200 dark:border-dark-border shadow-sm">
           <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-blue-600 dark:text-white">
             <Shield className="w-5 h-5 text-blue-500" />
             Gerenciamento de Dados
@@ -174,12 +174,12 @@ export default function SettingsTab({ state, updateState }: SettingsTabProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <button 
               onClick={handleExport}
-              className="flex items-center justify-center gap-2 px-6 py-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-2xl font-bold transition-all"
+              className="flex items-center justify-center gap-2 px-6 py-4 bg-slate-100 dark:bg-dark-hover hover:bg-slate-200 dark:hover:bg-dark-hover/80 rounded-2xl font-bold transition-all"
             >
               <Download className="w-5 h-5" />
               Exportar Backup
             </button>
-            <label className="flex items-center justify-center gap-2 px-6 py-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-2xl font-bold transition-all cursor-pointer">
+            <label className="flex items-center justify-center gap-2 px-6 py-4 bg-slate-100 dark:bg-dark-hover hover:bg-slate-200 dark:hover:bg-dark-hover/80 rounded-2xl font-bold transition-all cursor-pointer">
               <Upload className="w-5 h-5" />
               Importar Backup
               <input type="file" accept=".json" onChange={handleImport} className="hidden" />
@@ -207,7 +207,7 @@ function PercentInput({ label, value, onChange }: any) {
           type="number" 
           value={value}
           onChange={(e) => onChange(parseInt(e.target.value) || 0)}
-          className="w-full pl-4 pr-8 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full pl-4 pr-8 py-3 bg-slate-50 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
         />
         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">%</span>
       </div>

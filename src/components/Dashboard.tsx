@@ -231,11 +231,11 @@ export default function Dashboard({ state, updateState }: DashboardProps) {
   return (
     <div className="space-y-8">
       {/* Month Navigation */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white dark:bg-slate-900 p-4 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white dark:bg-dark-card p-4 rounded-3xl border border-slate-200 dark:border-dark-border shadow-sm">
         <div className="flex items-center gap-4">
           <button 
             onClick={() => changeMonth(-1)}
-            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all text-blue-600 dark:text-slate-400"
+            className="p-2 hover:bg-slate-100 dark:hover:bg-dark-hover rounded-xl transition-all text-blue-600 dark:text-slate-400"
           >
             <ChevronLeft className="w-6 h-6" />
           </button>
@@ -245,7 +245,7 @@ export default function Dashboard({ state, updateState }: DashboardProps) {
           </div>
           <button 
             onClick={() => changeMonth(1)}
-            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all text-blue-600 dark:text-slate-400"
+            className="p-2 hover:bg-slate-100 dark:hover:bg-dark-hover rounded-xl transition-all text-blue-600 dark:text-slate-400"
           >
             <ChevronRight className="w-6 h-6" />
           </button>
@@ -272,7 +272,7 @@ export default function Dashboard({ state, updateState }: DashboardProps) {
           className="space-y-8"
         >
           {/* Monthly Summary Card */}
-          <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div className="bg-white dark:bg-dark-card p-8 rounded-3xl border border-slate-200 dark:border-dark-border shadow-sm">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
               <div>
                 <h3 className="text-2xl font-bold text-blue-600 dark:text-white mb-1">Resumo de {capitalizedMonth}</h3>
@@ -285,15 +285,15 @@ export default function Dashboard({ state, updateState }: DashboardProps) {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-              <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
+              <div className="p-4 bg-slate-50 dark:bg-dark-input rounded-2xl border border-slate-100 dark:border-dark-border">
                 <p className="text-[10px] font-bold text-slate-500 uppercase mb-1">Despesas</p>
                 <p className="text-lg font-bold text-red-500">{formatCurrency(stats.expenses)}</p>
               </div>
-              <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
+              <div className="p-4 bg-slate-50 dark:bg-dark-input rounded-2xl border border-slate-100 dark:border-dark-border">
                 <p className="text-[10px] font-bold text-slate-500 uppercase mb-1">Cartão</p>
                 <p className="text-lg font-bold text-blue-500">{formatCurrency(stats.cards)}</p>
               </div>
-              <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
+              <div className="p-4 bg-slate-50 dark:bg-dark-input rounded-2xl border border-slate-100 dark:border-dark-border">
                 <p className="text-[10px] font-bold text-slate-500 uppercase mb-1">Total Gasto</p>
                 <p className="text-lg font-bold text-slate-700 dark:text-slate-200">{formatCurrency(stats.totalSpent)}</p>
               </div>
@@ -301,7 +301,7 @@ export default function Dashboard({ state, updateState }: DashboardProps) {
                 <p className="text-[10px] font-bold text-emerald-500 uppercase mb-1">Sobra</p>
                 <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(stats.remaining)}</p>
               </div>
-              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-800 col-span-2 md:col-span-1">
+              <div className="p-4 bg-blue-50 dark:bg-dark-hover/50 rounded-2xl border border-blue-100 dark:border-dark-border col-span-2 md:col-span-1">
                 <p className="text-[10px] font-bold text-blue-500 uppercase mb-1">Investimentos</p>
                 <p className="text-lg font-bold text-blue-600 dark:text-blue-400">{formatCurrency(stats.investments + stats.crypto)}</p>
               </div>
@@ -332,7 +332,7 @@ export default function Dashboard({ state, updateState }: DashboardProps) {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Chart Section */}
-            <div className="lg:col-span-2 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div className="lg:col-span-2 bg-white dark:bg-dark-card p-6 rounded-3xl border border-slate-200 dark:border-dark-border shadow-sm">
               <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-blue-600 dark:text-white">
                 <PieChartIcon className="w-5 h-5 text-emerald-500" />
                 Distribuição de Gastos
@@ -371,7 +371,7 @@ export default function Dashboard({ state, updateState }: DashboardProps) {
 
             {/* Forecast Section */}
             <div className="space-y-6">
-              <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+              <div className="bg-white dark:bg-dark-card p-6 rounded-3xl border border-slate-200 dark:border-dark-border shadow-sm">
                 <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-blue-600 dark:text-white">
                   <TrendingDown className="w-5 h-5 text-red-500" />
                   Previsão Próximo Mês
@@ -389,7 +389,7 @@ export default function Dashboard({ state, updateState }: DashboardProps) {
                     <span className="text-slate-500">Cartão:</span>
                     <span className="font-bold text-blue-600 dark:text-white">{formatCurrency(nextMonthForecast.cards)}</span>
                   </div>
-                  <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
+                  <div className="pt-4 border-t border-slate-100 dark:border-dark-border">
                     <div className="flex justify-between items-center mb-1">
                       <span className="text-slate-500 font-bold">Total Previsto:</span>
                       <span className="font-bold text-red-500">{formatCurrency(nextMonthForecast.total)}</span>
@@ -404,14 +404,14 @@ export default function Dashboard({ state, updateState }: DashboardProps) {
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+              <div className="bg-white dark:bg-dark-card p-6 rounded-3xl border border-slate-200 dark:border-dark-border shadow-sm">
                 <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-blue-600 dark:text-white">
                   <ArrowUpRight className="w-5 h-5 text-blue-500" />
                   Parcelas Futuras
                 </h3>
                 <div className="space-y-3">
                   {futureInstallments.length > 0 ? futureInstallments.map(([month, value]) => (
-                    <div key={month} className="flex justify-between items-center p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                    <div key={month} className="flex justify-between items-center p-3 rounded-xl bg-slate-50 dark:bg-dark-input">
                       <span className="text-sm font-medium text-blue-600 dark:text-slate-300">{month}</span>
                       <span className="font-bold text-blue-600 dark:text-white">{formatCurrency(value)}</span>
                     </div>
@@ -424,7 +424,7 @@ export default function Dashboard({ state, updateState }: DashboardProps) {
           </div>
 
           {/* Recent Transactions */}
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div className="bg-white dark:bg-dark-card p-6 rounded-3xl border border-slate-200 dark:border-dark-border shadow-sm">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-blue-600 dark:text-white">Transações do Mês</h3>
               <button 
@@ -477,7 +477,7 @@ export default function Dashboard({ state, updateState }: DashboardProps) {
 
                 if (filtered.length > 0) {
                   return filtered.slice(0, 10).map((t) => (
-                    <div key={t.id} className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50">
+                    <div key={t.id} className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-dark-input">
                       <div className="flex items-center gap-4">
                         <div className={cn(
                           "w-10 h-10 rounded-full flex items-center justify-center",
@@ -489,7 +489,7 @@ export default function Dashboard({ state, updateState }: DashboardProps) {
                           <div className="flex items-center gap-2">
                             <p className="font-semibold text-blue-600 dark:text-white">{t.description}</p>
                             {t.installments && t.installments.total > 1 && (
-                              <span className="text-[10px] px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-500 rounded font-bold">
+                              <span className="text-[10px] px-1.5 py-0.5 bg-blue-100 dark:bg-dark-input text-blue-500 rounded font-bold">
                                 {(() => {
                                   const tDate = new Date(t.date);
                                   const diff = (year * 12 + month) - (tDate.getFullYear() * 12 + tDate.getMonth());
@@ -537,7 +537,7 @@ function StatCard({ title, value, icon: Icon, color, onClick }: any) {
       whileHover={{ y: -5 }}
       onClick={onClick}
       className={cn(
-        "p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4",
+        "p-6 bg-white dark:bg-dark-card rounded-3xl border border-slate-200 dark:border-dark-border shadow-sm flex items-center gap-4",
         onClick && "cursor-pointer hover:border-blue-500 transition-colors"
       )}
     >
@@ -559,7 +559,7 @@ function DistributionRow({ label, percent, color }: any) {
         <span>{label}</span>
         <span>{percent}%</span>
       </div>
-      <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+      <div className="h-2 bg-slate-100 dark:bg-dark-input rounded-full overflow-hidden">
         <motion.div 
           initial={{ width: 0 }}
           animate={{ width: `${percent}%` }}

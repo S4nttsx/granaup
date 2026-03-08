@@ -18,11 +18,11 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-dark-bg p-4">
       <motion.div 
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800"
+        className="w-full max-w-md bg-white dark:bg-dark-card rounded-3xl shadow-2xl overflow-hidden border border-slate-200 dark:border-dark-border"
       >
         <div className="p-8">
           <div className="flex flex-col items-center mb-8">
@@ -44,7 +44,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
                   placeholder="Seu Nome"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                  className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                   required
                 />
               </div>
@@ -56,7 +56,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
                 placeholder="E-mail"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                 required
               />
             </div>
@@ -67,7 +67,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
                 placeholder="Senha"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                 required
               />
             </div>
@@ -83,16 +83,16 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
           <div className="mt-8 space-y-4">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200 dark:border-slate-800"></div>
+                <div className="w-full border-t border-slate-200 dark:border-dark-border"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white dark:bg-slate-900 text-slate-500">Ou</span>
+                <span className="px-2 bg-white dark:bg-dark-card text-slate-500">Ou</span>
               </div>
             </div>
 
             <button
               onClick={() => onLogin({ name: 'Visitante', email: 'visitante@granaup.com' })}
-              className="w-full py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium rounded-xl transition-all"
+              className="w-full py-3 bg-slate-100 dark:bg-dark-hover hover:bg-slate-200 dark:hover:bg-dark-hover/80 text-slate-700 dark:text-slate-300 font-medium rounded-xl transition-all"
             >
               Continuar como Visitante
             </button>

@@ -29,5 +29,8 @@ export const CATEGORIES = [
   'Saúde',
   'Educação',
   'Contas',
+  'Investimento',
+  'Meta',
+  'Cripto',
   'Outros',
 ];

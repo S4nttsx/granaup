@@ -326,11 +326,11 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
   return (
     <div className="space-y-8">
       {/* Month Navigation */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white dark:bg-slate-900 p-4 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white dark:bg-dark-card p-4 rounded-3xl border border-slate-200 dark:border-dark-border shadow-sm">
         <div className="flex items-center gap-4">
           <button 
             onClick={() => changeMonth(-1)}
-            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all text-blue-600 dark:text-slate-400"
+            className="p-2 hover:bg-slate-100 dark:hover:bg-dark-hover rounded-xl transition-all text-blue-600 dark:text-slate-400"
           >
             <ChevronLeft className="w-6 h-6" />
           </button>
@@ -340,7 +340,7 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
           </div>
           <button 
             onClick={() => changeMonth(1)}
-            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all text-blue-600 dark:text-slate-400"
+            className="p-2 hover:bg-slate-100 dark:hover:bg-dark-hover rounded-xl transition-all text-blue-600 dark:text-slate-400"
           >
             <ChevronRight className="w-6 h-6" />
           </button>
@@ -359,7 +359,7 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
           <motion.section 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm"
+            className="bg-white dark:bg-dark-card p-6 rounded-3xl border border-slate-200 dark:border-dark-border shadow-sm"
           >
             <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-blue-600 dark:text-white">
               <DollarSign className="w-5 h-5 text-blue-500" />
@@ -374,7 +374,7 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
                     type="number" 
                     value={salaryInput}
                     onChange={(e) => setSalaryInput(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
@@ -387,7 +387,7 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
                     placeholder="Ex: 05"
                     value={salaryDateInput}
                     onChange={(e) => setSalaryDateInput(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
@@ -397,7 +397,7 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
                   placeholder="Ex: Pagamento do trabalho principal"
                   value={salaryObsInput}
                   onChange={(e) => setSalaryObsInput(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px]"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px]"
                 />
               </div>
               <button 
@@ -411,7 +411,7 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
           </motion.section>
 
           {/* Mini Chart */}
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div className="bg-white dark:bg-dark-card p-6 rounded-3xl border border-slate-200 dark:border-dark-border shadow-sm">
             <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-blue-600 dark:text-white">
               <PieChartIcon className="w-5 h-5 text-blue-500" />
               Resumo
@@ -454,7 +454,7 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
                 <span className="text-slate-500">Despesas:</span>
                 <span className="font-bold text-red-500">{formatCurrency(stats.expenses)}</span>
               </div>
-              <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex justify-between text-sm">
+              <div className="pt-2 border-t border-slate-100 dark:border-dark-border flex justify-between text-sm">
                 <span className="text-slate-500 font-bold">Restante:</span>
                 <span className="font-bold text-emerald-500">{formatCurrency(stats.remaining)}</span>
               </div>
@@ -481,11 +481,11 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="p-6 bg-white dark:bg-slate-900 rounded-3xl border-2 border-red-500/30 shadow-xl"
+                className="p-6 bg-white dark:bg-dark-card rounded-3xl border-2 border-red-500/30 shadow-xl"
               >
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-bold">{editingExpense ? 'Editar Despesa' : 'Nova Despesa'}</h3>
-                  <button onClick={resetExpenseForm} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl">
+                  <button onClick={resetExpenseForm} className="p-2 hover:bg-slate-100 dark:hover:bg-dark-hover rounded-xl">
                     <X className="w-5 h-5" />
                   </button>
                 </div>
@@ -497,7 +497,7 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
                       placeholder="Ex: Aluguel, Mercado"
                       value={expenseName}
                       onChange={(e) => setExpenseName(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-red-500"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl outline-none focus:ring-2 focus:ring-red-500"
                     />
                   </div>
                   <div className="space-y-1">
@@ -507,7 +507,7 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
                       placeholder="0.00"
                       value={expenseValue}
                       onChange={(e) => setExpenseValue(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-red-500"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl outline-none focus:ring-2 focus:ring-red-500"
                     />
                     {parseInt(expenseInstallments) > 1 && (
                       <p className="text-[10px] text-slate-400">Insira o valor TOTAL da compra parcelada.</p>
@@ -518,7 +518,7 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
                     <select
                       value={expenseCategory}
                       onChange={(e) => setExpenseCategory(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-red-500"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl outline-none focus:ring-2 focus:ring-red-500"
                     >
                       {CATEGORIES.map(cat => (
                         <option key={cat} value={cat}>{cat}</option>
@@ -531,7 +531,7 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
                       type="date"
                       value={expenseDate}
                       onChange={(e) => setExpenseDate(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-red-500"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl outline-none focus:ring-2 focus:ring-red-500"
                     />
                   </div>
                   <div className="space-y-1">
@@ -539,7 +539,7 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
                     <select
                       value={expensePaymentMethod}
                       onChange={(e) => setExpensePaymentMethod(e.target.value as PaymentMethod)}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-red-500"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl outline-none focus:ring-2 focus:ring-red-500"
                     >
                       <option value="dinheiro">Dinheiro</option>
                       <option value="pix">Pix</option>
@@ -555,7 +555,7 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
                       <select
                         value={expenseCardId}
                         onChange={(e) => setExpenseCardId(e.target.value)}
-                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-red-500"
+                        className="w-full px-4 py-3 bg-slate-50 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl outline-none focus:ring-2 focus:ring-red-500"
                       >
                         <option value="">Selecione um cartão</option>
                         {state.cards.map(card => (
@@ -572,7 +572,7 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
                       placeholder="Ex: 12"
                       value={expenseInstallments}
                       onChange={(e) => setExpenseInstallments(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-red-500"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl outline-none focus:ring-2 focus:ring-red-500"
                     />
                   </div>
                   <div className="space-y-1 md:col-span-2">
@@ -586,7 +586,7 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
                             "py-2 px-3 rounded-xl text-xs font-bold border transition-all",
                             expenseRecurrence === r 
                               ? "bg-red-500 text-white border-red-500 shadow-md" 
-                              : "bg-slate-50 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700 hover:border-red-500"
+                              : "bg-slate-50 dark:bg-dark-input text-slate-500 border-slate-200 dark:border-dark-border hover:border-red-500"
                           )}
                         >
                           {getRecurrenceLabel(r)}
@@ -604,7 +604,7 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
                   </button>
                   <button 
                     onClick={resetExpenseForm}
-                    className="px-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold rounded-xl"
+                    className="px-6 py-3 bg-slate-100 dark:bg-dark-hover text-slate-600 dark:text-slate-400 font-bold rounded-xl"
                   >
                     Cancelar
                   </button>
@@ -613,14 +613,14 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
             )}
           </AnimatePresence>
 
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+          <div className="bg-white dark:bg-dark-card rounded-3xl border border-slate-200 dark:border-dark-border shadow-sm overflow-hidden">
+            <div className="p-6 border-b border-slate-100 dark:border-dark-border flex items-center justify-between">
               <h4 className="font-bold">Lista de Despesas</h4>
-              <span className="text-xs font-bold px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500">
+              <span className="text-xs font-bold px-3 py-1 bg-slate-100 dark:bg-dark-input rounded-full text-slate-500">
                 {state.transactions.filter(t => t.type === 'expense').length} itens
               </span>
             </div>
-            <div className="divide-y divide-slate-100 dark:divide-slate-800">
+            <div className="divide-y divide-slate-100 dark:divide-dark-border">
               {stats.monthlyTransactions.filter(t => t.type === 'expense').length > 0 ? (
                 stats.monthlyTransactions.filter(t => t.type === 'expense').map((expense) => (
                   <motion.div 
@@ -628,22 +628,22 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
                     layout
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group"
+                    className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50 dark:hover:bg-dark-hover/30 transition-colors group"
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-xl flex items-center justify-center">
+                    <div className="flex items-center gap-4 min-w-0">
+                      <div className="flex-shrink-0 w-10 h-10 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-xl flex items-center justify-center">
                         {expense.recurrence && expense.recurrence !== 'none' ? <RefreshCw className="w-5 h-5 animate-spin-slow" /> : <ArrowDownRight className="w-5 h-5" />}
                       </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-bold">{expense.description}</p>
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="font-bold truncate">{expense.description}</p>
                           {expense.recurrence && expense.recurrence !== 'none' && (
-                            <span className="text-[10px] px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-500 rounded font-bold uppercase">
+                            <span className="text-[10px] px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-500 rounded font-bold uppercase whitespace-nowrap">
                               {getRecurrenceLabel(expense.recurrence)}
                             </span>
                           )}
                           {expense.installments && expense.installments.total > 1 && (
-                            <span className="text-[10px] px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-500 rounded font-bold uppercase">
+                            <span className="text-[10px] px-1.5 py-0.5 bg-blue-100 dark:bg-dark-input text-blue-500 rounded font-bold uppercase whitespace-nowrap">
                               {(() => {
                                 const tDate = new Date(expense.date);
                                 const diff = (selectedDate.getFullYear() * 12 + selectedDate.getMonth()) - (tDate.getFullYear() * 12 + tDate.getMonth());
@@ -652,7 +652,7 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center gap-2 text-xs text-slate-500">
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] sm:text-xs text-slate-500">
                           <span className="flex items-center gap-1"><Tag className="w-3 h-3" /> {expense.category}</span>
                           <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {new Date(expense.date).toLocaleDateString('pt-BR')}</span>
                           {expense.paymentMethod && (
@@ -664,7 +664,7 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center justify-between sm:justify-end gap-4">
                       <div className="text-right">
                         <span className="block font-bold text-red-500">-{formatCurrency(expense.monthlyAmount || expense.amount)}</span>
                         {expense.installments && expense.installments.total > 1 && (
@@ -673,16 +673,16 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
                           </span>
                         )}
                       </div>
-                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                         <button 
                           onClick={() => handleEditExpense(expense)}
-                          className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all"
+                          className="p-2 text-blue-500 md:text-slate-400 md:hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button 
                           onClick={() => deleteExpense(expense)}
-                          className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                          className="p-2 text-red-500 md:text-slate-400 md:hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

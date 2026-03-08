@@ -86,7 +86,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex bg-white dark:bg-slate-950 text-blue-600 dark:text-slate-100 transition-colors duration-300">
+    <div className="min-h-screen flex bg-white dark:bg-dark-bg text-blue-600 dark:text-slate-100 transition-colors duration-300">
       {/* Sidebar Mobile Overlay */}
       <AnimatePresence>
         {isSidebarOpen && (
@@ -102,7 +102,7 @@ export default function App() {
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-transform duration-300 lg:translate-x-0 lg:static",
+        "fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-dark-card border-r border-slate-200 dark:border-dark-border transition-transform duration-300 lg:translate-x-0 lg:static",
         isSidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="flex flex-col h-full">
@@ -125,7 +125,7 @@ export default function App() {
                   "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group",
                   activeTab === item.id 
                     ? "bg-blue-500 text-white shadow-lg shadow-blue-500/20" 
-                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-dark-hover"
                 )}
               >
                 <item.icon className={cn("w-5 h-5", activeTab === item.id ? "text-white" : "group-hover:scale-110 transition-transform")} />
@@ -134,10 +134,10 @@ export default function App() {
             ))}
           </nav>
 
-          <div className="p-4 border-t border-slate-200 dark:border-slate-800 space-y-2">
+          <div className="p-4 border-t border-slate-200 dark:border-dark-border space-y-2">
             <button 
               onClick={() => updateState({ darkMode: !state.darkMode })}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-dark-hover transition-all"
             >
               {state.darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               <span className="font-medium">{state.darkMode ? 'Modo Claro' : 'Modo Escuro'}</span>
@@ -156,14 +156,14 @@ export default function App() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Header */}
-        <header className="h-16 flex items-center justify-between px-6 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 lg:hidden">
+        <header className="h-16 flex items-center justify-between px-6 bg-white dark:bg-dark-card border-b border-slate-200 dark:border-dark-border lg:hidden">
           <div className="flex items-center gap-3">
             <Wallet className="text-blue-500 w-6 h-6" />
             <span className="text-xl font-bold text-blue-600 dark:text-blue-400">GranaUp</span>
           </div>
           <button 
             onClick={() => setIsSidebarOpen(true)}
-            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-dark-hover"
           >
             <Menu className="w-6 h-6" />
           </button>
