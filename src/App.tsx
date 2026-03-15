@@ -20,6 +20,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { Analytics } from '@vercel/analytics/react';
 import { INITIAL_STATE } from './constants';
 import { AppState, TabType, Goal, Investment, Crypto, CreditCard as Card, Transaction } from './types';
 
@@ -86,19 +87,21 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex bg-white dark:bg-dark-bg text-blue-600 dark:text-slate-100 transition-colors duration-300">
-      {/* Sidebar Mobile Overlay */}
-      <AnimatePresence>
-        {isSidebarOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setIsSidebarOpen(false)}
-            className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm"
-          />
-        )}
-      </AnimatePresence>
+    <>
+      <Analytics />
+      <div className="min-h-screen flex bg-white dark:bg-dark-bg text-blue-600 dark:text-slate-100 transition-colors duration-300">
+        {/* Sidebar Mobile Overlay */}
+        <AnimatePresence>
+          {isSidebarOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsSidebarOpen(false)}
+              className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm"
+            />
+          )}
+        </AnimatePresence>
 
       {/* Sidebar */}
       <aside className={cn(
@@ -183,5 +186,6 @@ export default function App() {
         </div>
       </main>
     </div>
+    </>
   );
 }
