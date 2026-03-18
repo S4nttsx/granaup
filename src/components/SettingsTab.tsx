@@ -9,7 +9,8 @@ import {
   Shield, 
   Moon, 
   Sun,
-  AlertTriangle
+  AlertTriangle,
+  Building2
 } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -86,6 +87,32 @@ export default function SettingsTab({ state, updateState }: SettingsTabProps) {
                 className="w-full px-4 py-3 bg-slate-50 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
+          </div>
+        </section>
+
+        {/* Appearance Section */}
+        <section className="bg-white dark:bg-dark-card p-6 rounded-3xl border border-slate-200 dark:border-dark-border shadow-sm">
+          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-blue-600 dark:text-white">
+            <Building2 className="w-5 h-5 text-blue-500" />
+            Modo Empresa
+          </h3>
+          <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-dark-input rounded-2xl border border-slate-200 dark:border-dark-border">
+            <div>
+              <p className="font-bold">Ativar Funções Empresariais</p>
+              <p className="text-sm text-slate-500">Libera controle de vendas, clientes e fornecedores.</p>
+            </div>
+            <button 
+              onClick={() => updateState({ isCompanyMode: !state.isCompanyMode })}
+              className={cn(
+                "w-14 h-8 rounded-full transition-all relative",
+                state.isCompanyMode ? "bg-blue-500" : "bg-slate-300 dark:bg-slate-700"
+              )}
+            >
+              <div className={cn(
+                "absolute top-1 w-6 h-6 bg-white rounded-full transition-all",
+                state.isCompanyMode ? "left-7" : "left-1"
+              )} />
+            </button>
           </div>
         </section>
 

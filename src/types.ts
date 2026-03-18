@@ -1,6 +1,30 @@
 import { LucideIcon } from 'lucide-react';
 
-export type TabType = 'dashboard' | 'metas' | 'investimentos' | 'cripto' | 'cartao' | 'config' | 'despesas';
+export type TabType = 'dashboard' | 'metas' | 'investimentos' | 'cripto' | 'cartao' | 'config' | 'financeiro' | 'empresa' | 'salario' | 'noticias';
+
+export interface Customer {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  totalSpent: number;
+}
+
+export interface Supplier {
+  id: string;
+  name: string;
+  cnpj?: string;
+  category: string;
+  contact: string;
+}
+
+export interface Sale {
+  id: string;
+  customerId: string;
+  amount: number;
+  date: string;
+  items: string;
+}
 
 export interface User {
   name: string;
@@ -52,7 +76,7 @@ export interface Transaction {
   type: 'expense' | 'income';
   category: string;
   date: string;
-  recurrence?: 'none' | 'weekly' | 'monthly' | 'yearly';
+  recurrence?: 'none' | 'monthly' | 'yearly';
   parentTransactionId?: string;
   paymentMethod?: PaymentMethod;
   cardId?: string;
@@ -60,6 +84,36 @@ export interface Transaction {
     total: number;
     current: number; // This might be redundant if we calculate based on date, but let's keep it for compatibility or specific overrides
   };
+}
+
+export interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  type: 'info' | 'warning' | 'success' | 'error';
+  date: string;
+  read: boolean;
+}
+
+export interface Payable {
+  id: string;
+  supplierId?: string;
+  supplierName: string;
+  amount: number;
+  purchaseDate: string;
+  dueDate: string;
+  description: string;
+  paid: boolean;
+}
+
+export interface Receivable {
+  id: string;
+  customerName: string;
+  amount: number;
+  purchaseDate: string;
+  dueDate: string;
+  description: string;
+  received: boolean;
 }
 
 export interface AppState {
@@ -78,5 +132,12 @@ export interface AppState {
   cryptos: Crypto[];
   cards: CreditCard[];
   transactions: Transaction[];
+  customers: Customer[];
+  suppliers: Supplier[];
+  sales: Sale[];
+  payables: Payable[];
+  receivables: Receivable[];
+  notifications: Notification[];
   darkMode: boolean;
+  isCompanyMode: boolean;
 }

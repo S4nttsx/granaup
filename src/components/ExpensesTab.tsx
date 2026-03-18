@@ -33,13 +33,14 @@ import { CATEGORIES } from '../constants';
 interface ExpensesTabProps {
   state: AppState;
   updateState: (updates: Partial<AppState>) => void;
+  categories?: string[];
 }
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
+export default function ExpensesTab({ state, updateState, categories = CATEGORIES }: ExpensesTabProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isAddingExpense, setIsAddingExpense] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Transaction | null>(null);
@@ -59,10 +60,11 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
   const [salaryDateInput, setSalaryDateInput] = useState(state.salaryDate || '');
   const [salaryObsInput, setSalaryObsInput] = useState(state.salaryObservation || '');
 
-  // Expense form state
+  // Expense/Income form state
+  const [transactionType, setTransactionType] = useState<'expense' | 'income'>('expense');
   const [expenseName, setExpenseName] = useState('');
   const [expenseValue, setExpenseValue] = useState('');
-  const [expenseCategory, setExpenseCategory] = useState(CATEGORIES[0]);
+  const [expenseCategory, setExpenseCategory] = useState(categories[0]);
   const [expenseDate, setExpenseDate] = useState(new Date().toISOString().split('T')[0]);
   const [expenseRecurrence, setExpenseRecurrence] = useState<Transaction['recurrence']>('none');
   const [expenseInstallments, setExpenseInstallments] = useState('1');
@@ -86,8 +88,7 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
       // Advance to the next occurrence
       const advanceDate = (date: Date, recurrence: string) => {
         const d = new Date(date);
-        if (recurrence === 'weekly') d.setDate(d.getDate() + 7);
-        else if (recurrence === 'monthly') d.setMonth(d.getMonth() + 1);
+        if (recurrence === 'monthly') d.setMonth(d.getMonth() + 1);
         else if (recurrence === 'yearly') d.setFullYear(d.getFullYear() + 1);
         return d;
       };
@@ -127,17 +128,30 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
       const tDate = new Date(t.date);
       const tMonth = tDate.getMonth();
       const tYear = tDate.getFullYear();
+      const startTotalMonths = tYear * 12 + tMonth;
+      const targetTotalMonths = year * 12 + month;
+      const diff = targetTotalMonths - startTotalMonths;
 
-      if (!t.installments || t.installments.total <= 1) {
-        return (tMonth === month && tYear === year) ? t.amount : 0;
-      } else {
-        const totalInstallments = t.installments.total;
-        const installmentValue = t.amount / totalInstallments;
-        const startTotalMonths = tYear * 12 + tMonth;
-        const targetTotalMonths = year * 12 + month;
-        const diff = targetTotalMonths - startTotalMonths;
-        if (diff >= 0 && diff < totalInstallments) return installmentValue;
+      if (t.recurrence && t.recurrence !== 'none') {
+        if (t.recurrence === 'monthly') {
+          const totalMonths = t.installments?.total || 1;
+          if (diff >= 1 && diff <= totalMonths) return t.amount;
+        } else if (t.recurrence === 'yearly') {
+          const totalYears = t.installments?.total || 1;
+          const diffYears = Math.floor(diff / 12);
+          const monthMatch = (diff % 12) === 0;
+          if (diffYears >= 1 && diffYears <= totalYears && monthMatch) return t.amount;
+        }
         return 0;
+      } else {
+        if (!t.installments || t.installments.total <= 1) {
+          return (tMonth === month && tYear === year) ? t.amount : 0;
+        } else {
+          const totalInstallments = t.installments.total;
+          const installmentValue = t.amount / totalInstallments;
+          if (diff >= 0 && diff < totalInstallments) return installmentValue;
+          return 0;
+        }
       }
     };
 
@@ -149,10 +163,16 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
       .filter(t => t.type === 'expense')
       .reduce((acc, t) => acc + t.monthlyAmount, 0);
     
-    const remaining = state.salary - totalExpenses;
+    const otherIncomes = monthlyTransactions
+      .filter(t => t.type === 'income')
+      .reduce((acc, t) => acc + t.monthlyAmount, 0);
+    
+    const totalIncome = otherIncomes;
+    const remaining = totalIncome - totalExpenses;
 
     return {
-      salary: state.salary,
+      otherIncomes,
+      totalIncome,
       expenses: totalExpenses,
       remaining,
       monthlyTransactions
@@ -186,7 +206,7 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
       id: Date.now().toString(),
       description: expenseName,
       amount: totalAmount,
-      type: 'expense',
+      type: transactionType,
       category: expenseCategory,
       date: new Date(expenseDate).toISOString(),
       recurrence: expenseRecurrence,
@@ -199,7 +219,7 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
     };
 
     let updatedCards = [...state.cards];
-    if (expensePaymentMethod === 'credito' && expenseCardId) {
+    if (transactionType === 'expense' && expensePaymentMethod === 'credito' && expenseCardId) {
       updatedCards = state.cards.map(c => {
         if (c.id === expenseCardId) {
           return {
@@ -220,6 +240,7 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
 
   const handleEditExpense = (expense: Transaction) => {
     setEditingExpense(expense);
+    setTransactionType(expense.type);
     setExpenseName(expense.description);
     setExpenseValue(expense.amount.toString());
     setExpenseCategory(expense.category);
@@ -264,6 +285,7 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
             ...t, 
             description: expenseName, 
             amount: totalAmount, 
+            type: transactionType,
             category: expenseCategory, 
             date: new Date(expenseDate).toISOString(),
             recurrence: expenseRecurrence,
@@ -285,9 +307,10 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
   };
 
   const resetExpenseForm = () => {
+    setTransactionType('expense');
     setExpenseName('');
     setExpenseValue('');
-    setExpenseCategory(CATEGORIES[0]);
+    setExpenseCategory(categories[0]);
     setExpenseDate(new Date().toISOString().split('T')[0]);
     setExpenseRecurrence('none');
     setExpenseInstallments('1');
@@ -316,7 +339,6 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
 
   const getRecurrenceLabel = (r?: string) => {
     switch(r) {
-      case 'weekly': return 'Semanal';
       case 'monthly': return 'Mensal';
       case 'yearly': return 'Anual';
       default: return 'Única';
@@ -324,154 +346,142 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
   };
 
   return (
-    <div className="space-y-8">
-      {/* Month Navigation */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white dark:bg-dark-card p-4 rounded-3xl border border-slate-200 dark:border-dark-border shadow-sm">
-        <div className="flex items-center gap-4">
+    <div className="max-w-7xl mx-auto space-y-12">
+      {/* Month Navigation & Top Stats */}
+      <div className="flex flex-col xl:flex-row items-stretch gap-6">
+        <div className="flex items-center justify-between bg-white dark:bg-dark-card p-4 rounded-2xl border border-slate-200/60 dark:border-dark-border shadow-sm flex-1 group relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-700" />
           <button 
             onClick={() => changeMonth(-1)}
-            className="p-2 hover:bg-slate-100 dark:hover:bg-dark-hover rounded-xl transition-all text-blue-600 dark:text-slate-400"
+            className="p-3 hover:bg-slate-100 dark:hover:bg-dark-hover rounded-xl transition-all text-slate-400 hover:text-blue-600 relative z-10"
           >
-            <ChevronLeft className="w-6 h-6" />
+            <ChevronLeft className="w-5 h-5" />
           </button>
-          <div className="flex flex-col items-center min-w-[150px]">
-            <span className="text-xl font-bold text-blue-600 dark:text-white">{capitalizedMonth}</span>
-            <span className="text-xs text-slate-500 font-medium">{currentYear}</span>
+          <div className="flex flex-col items-center px-6 relative z-10">
+            <span className="text-xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">{capitalizedMonth}</span>
+            <span className="text-[8px] text-slate-400 font-black uppercase tracking-[0.3em] mt-1.5">{currentYear}</span>
           </div>
           <button 
             onClick={() => changeMonth(1)}
-            className="p-2 hover:bg-slate-100 dark:hover:bg-dark-hover rounded-xl transition-all text-blue-600 dark:text-slate-400"
+            className="p-3 hover:bg-slate-100 dark:hover:bg-dark-hover rounded-xl transition-all text-slate-400 hover:text-blue-600 relative z-10"
           >
-            <ChevronRight className="w-6 h-6" />
+            <ChevronRight className="w-5 h-5" />
           </button>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="p-4 bg-blue-500/10 text-blue-500 rounded-2xl border border-blue-500/20">
-            <p className="text-xs font-bold uppercase">Restante em {capitalizedMonth}</p>
-            <p className="text-xl font-bold">{formatCurrency(stats.remaining)}</p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 flex-[2]">
+          <div className="bg-white dark:bg-dark-card p-6 rounded-2xl border border-slate-200/60 dark:border-dark-border shadow-sm group relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/5 rounded-full -mr-10 -mt-10 group-hover:scale-150 transition-transform duration-700" />
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-1.5">Entradas</p>
+            <p className="text-xl font-black text-emerald-600 tracking-tighter">{formatCurrency(stats.totalIncome)}</p>
+          </div>
+          <div className="bg-white dark:bg-dark-card p-6 rounded-2xl border border-slate-200/60 dark:border-dark-border shadow-sm group relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-red-500/5 rounded-full -mr-10 -mt-10 group-hover:scale-150 transition-transform duration-700" />
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-1.5">Saídas</p>
+            <p className="text-xl font-black text-red-500 tracking-tighter">{formatCurrency(stats.expenses)}</p>
+          </div>
+          <div className="bg-blue-600 p-6 rounded-2xl shadow-2xl shadow-blue-600/30 group relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-10 -mt-10 group-hover:scale-150 transition-transform duration-700" />
+            <p className="text-[9px] font-bold text-blue-100/60 uppercase tracking-[0.2em] mb-1.5">Saldo Livre</p>
+            <p className="text-xl font-black text-white tracking-tighter">{formatCurrency(stats.remaining)}</p>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Salary Section */}
-        <div className="space-y-6">
-          <motion.section 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="bg-white dark:bg-dark-card p-6 rounded-3xl border border-slate-200 dark:border-dark-border shadow-sm"
-          >
-            <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-blue-600 dark:text-white">
-              <DollarSign className="w-5 h-5 text-blue-500" />
-              Meu Salário
-            </h3>
-            <div className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase">Valor Mensal</label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">R$</span>
-                  <input 
-                    type="number" 
-                    value={salaryInput}
-                    onChange={(e) => setSalaryInput(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase">Dia do Recebimento</label>
-                <div className="relative">
-                  <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-                  <input 
-                    type="text" 
-                    placeholder="Ex: 05"
-                    value={salaryDateInput}
-                    onChange={(e) => setSalaryDateInput(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase">Observação</label>
-                <textarea 
-                  placeholder="Ex: Pagamento do trabalho principal"
-                  value={salaryObsInput}
-                  onChange={(e) => setSalaryObsInput(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px]"
-                />
-              </div>
-              <button 
-                onClick={handleSaveSalary}
-                className="w-full py-3 bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-all flex items-center justify-center gap-2"
-              >
-                <Save className="w-5 h-5" />
-                Salvar Salário
-              </button>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        {/* Left Column: Chart & Summary */}
+        <div className="lg:col-span-4 space-y-6">
+          <div className="bg-white dark:bg-dark-card p-6 rounded-3xl border border-slate-200/60 dark:border-dark-border shadow-sm group relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500/5 rounded-full -mr-20 -mt-20 group-hover:scale-110 transition-transform duration-700" />
+            
+            <div className="flex items-center justify-between mb-8 relative z-10">
+              <h3 className="text-[9px] font-black flex items-center gap-2.5 text-slate-400 uppercase tracking-[0.3em]">
+                <PieChartIcon className="w-4.5 h-4.5 text-blue-600" />
+                Distribuição
+              </h3>
             </div>
-          </motion.section>
-
-          {/* Mini Chart */}
-          <div className="bg-white dark:bg-dark-card p-6 rounded-3xl border border-slate-200 dark:border-dark-border shadow-sm">
-            <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-blue-600 dark:text-white">
-              <PieChartIcon className="w-5 h-5 text-blue-500" />
-              Resumo
-            </h3>
-            <div className="h-[200px] w-full">
+            
+            <div className="h-[240px] w-full relative z-10">
               {chartData.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={chartData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={40}
-                      outerRadius={70}
-                      paddingAngle={5}
-                      dataKey="value"
-                    >
-                      {chartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip 
-                      formatter={(value: number) => formatCurrency(value)}
-                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
+                <>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={chartData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={70}
+                        outerRadius={90}
+                        paddingAngle={10}
+                        dataKey="value"
+                        stroke="none"
+                      >
+                        {chartData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip 
+                        content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                            return (
+                              <div className="bg-white dark:bg-dark-card p-3 rounded-2xl shadow-2xl border border-slate-100 dark:border-dark-border">
+                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">{payload[0].name}</p>
+                                <p className="text-base font-black text-slate-900 dark:text-white tracking-tight">{formatCurrency(payload[0].value as number)}</p>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-0.5">Total Gasto</span>
+                    <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">{formatCurrency(stats.expenses)}</span>
+                  </div>
+                </>
               ) : (
-                <div className="h-full flex items-center justify-center text-slate-400 text-sm">
-                  Sem dados para exibir
+                <div className="h-full flex flex-col items-center justify-center text-slate-300 gap-3">
+                  <div className="w-16 h-16 bg-slate-50 dark:bg-dark-input rounded-full flex items-center justify-center border border-slate-100 dark:border-dark-border">
+                    <PieChartIcon className="w-8 h-8 opacity-20" />
+                  </div>
+                  <p className="text-xs font-bold uppercase tracking-widest opacity-50 italic">Sem dados</p>
                 </div>
               )}
             </div>
-            <div className="mt-4 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-500">Salário:</span>
-                <span className="font-bold">{formatCurrency(stats.salary)}</span>
+
+            <div className="mt-8 space-y-3 relative z-10">
+              <div className="flex justify-between items-center p-4 bg-slate-50 dark:bg-dark-input rounded-xl border border-slate-100 dark:border-dark-border group/item hover:scale-[1.02] transition-transform">
+                <div className="flex items-center gap-3">
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/40" />
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Entradas</span>
+                </div>
+                <span className="text-base font-black text-emerald-600 tracking-tighter">+{formatCurrency(stats.totalIncome)}</span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-500">Despesas:</span>
-                <span className="font-bold text-red-500">{formatCurrency(stats.expenses)}</span>
-              </div>
-              <div className="pt-2 border-t border-slate-100 dark:border-dark-border flex justify-between text-sm">
-                <span className="text-slate-500 font-bold">Restante:</span>
-                <span className="font-bold text-emerald-500">{formatCurrency(stats.remaining)}</span>
+              <div className="flex justify-between items-center p-4 bg-slate-50 dark:bg-dark-input rounded-xl border border-slate-100 dark:border-dark-border group/item hover:scale-[1.02] transition-transform">
+                <div className="flex items-center gap-3">
+                  <div className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-lg shadow-red-500/40" />
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Saídas</span>
+                </div>
+                <span className="text-base font-black text-red-600 tracking-tighter">-{formatCurrency(stats.expenses)}</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Expenses Section */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="flex items-center justify-between">
-            <h3 className="text-2xl font-bold">Minhas Despesas</h3>
+        {/* Right Column: Transactions */}
+        <div className="lg:col-span-8 space-y-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-1.5">
+              <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">Extrato <span className="text-blue-600">Mensal</span></h3>
+              <p className="text-sm text-slate-500 font-medium">Gerencie suas movimentações de {capitalizedMonth} com facilidade.</p>
+            </div>
             <button 
               onClick={() => setIsAddingExpense(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-red-500 text-white font-bold rounded-2xl shadow-lg shadow-red-500/20 hover:bg-red-600 transition-all active:scale-95"
+              className="w-full md:w-auto flex items-center justify-center gap-2.5 px-8 py-4 bg-blue-600 text-white font-bold rounded-xl shadow-2xl shadow-blue-600/30 hover:bg-blue-700 transition-all active:scale-95 group"
             >
-              <Plus className="w-5 h-5" />
-              Adicionar Despesa
+              <Plus className="w-5 h-5 transition-transform group-hover:rotate-90" />
+              Nova Transação
             </button>
           </div>
 
@@ -481,169 +491,204 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="p-6 bg-white dark:bg-dark-card rounded-3xl border-2 border-red-500/30 shadow-xl"
+                className="p-8 bg-white dark:bg-dark-card rounded-2xl border border-blue-600/20 shadow-2xl shadow-blue-600/5 space-y-8 relative overflow-hidden"
               >
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-bold">{editingExpense ? 'Editar Despesa' : 'Nova Despesa'}</h3>
-                  <button onClick={resetExpenseForm} className="p-2 hover:bg-slate-100 dark:hover:bg-dark-hover rounded-xl">
-                    <X className="w-5 h-5" />
+                <div className="absolute top-0 left-0 w-1.5 h-full bg-blue-600" />
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-blue-600/10 rounded-xl flex items-center justify-center">
+                      <Plus className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">{editingExpense ? 'Editar Transação' : 'Nova Transação'}</h3>
+                      <p className="text-xs text-slate-500 font-medium">Preencha os detalhes da movimentação abaixo.</p>
+                    </div>
+                  </div>
+                  <button onClick={resetExpenseForm} className="p-2.5 hover:bg-slate-100 dark:hover:bg-dark-hover rounded-xl transition-all">
+                    <X className="w-5 h-5 text-slate-400" />
                   </button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-500 uppercase">Nome da Despesa</label>
+
+                <div className="flex gap-2.5 p-1.5 bg-slate-100 dark:bg-dark-input rounded-xl">
+                  <button
+                    onClick={() => setTransactionType('expense')}
+                    className={cn(
+                      "flex-1 py-3 rounded-lg text-xs font-black uppercase tracking-widest transition-all",
+                      transactionType === 'expense' 
+                        ? "bg-white dark:bg-dark-card text-red-600 shadow-xl" 
+                        : "text-slate-500 hover:text-slate-700"
+                    )}
+                  >
+                    Despesa
+                  </button>
+                  <button
+                    onClick={() => {
+                      setTransactionType('income');
+                      setExpenseCategory('Renda Extra');
+                      setExpenseRecurrence('none');
+                      setExpenseInstallments('1');
+                    }}
+                    className={cn(
+                      "flex-1 py-3 rounded-lg text-xs font-black uppercase tracking-widest transition-all",
+                      transactionType === 'income' 
+                        ? "bg-white dark:bg-dark-card text-emerald-600 shadow-xl" 
+                        : "text-slate-500 hover:text-slate-700"
+                    )}
+                  >
+                    Entrada
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] ml-1">Descrição</label>
                     <input
                       type="text"
-                      placeholder="Ex: Aluguel, Mercado"
+                      placeholder="Ex: Aluguel, Freelance, Mercado"
                       value={expenseName}
                       onChange={(e) => setExpenseName(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl outline-none focus:ring-2 focus:ring-red-500"
+                      className="w-full px-5 py-3.5 bg-slate-50 dark:bg-dark-input border-2 border-slate-100 dark:border-dark-border rounded-xl outline-none focus:border-blue-600 transition-all font-medium text-sm"
                     />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-500 uppercase">Valor (R$)</label>
-                    <input
-                      type="number"
-                      placeholder="0.00"
-                      value={expenseValue}
-                      onChange={(e) => setExpenseValue(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl outline-none focus:ring-2 focus:ring-red-500"
-                    />
-                    {parseInt(expenseInstallments) > 1 && (
-                      <p className="text-[10px] text-slate-400">Insira o valor TOTAL da compra parcelada.</p>
-                    )}
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] ml-1">Valor (R$)</label>
+                    <div className="relative">
+                      <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 text-lg font-bold">R$</span>
+                      <input
+                        type="number"
+                        placeholder="0,00"
+                        value={expenseValue}
+                        onChange={(e) => setExpenseValue(e.target.value)}
+                        className="w-full pl-14 pr-5 py-3.5 bg-slate-50 dark:bg-dark-input border-2 border-slate-100 dark:border-dark-border rounded-xl outline-none focus:border-blue-600 transition-all text-xl font-black tracking-tighter"
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-500 uppercase">Categoria</label>
-                    <select
-                      value={expenseCategory}
-                      onChange={(e) => setExpenseCategory(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl outline-none focus:ring-2 focus:ring-red-500"
-                    >
-                      {CATEGORIES.map(cat => (
-                        <option key={cat} value={cat}>{cat}</option>
-                      ))}
-                    </select>
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] ml-1">Categoria</label>
+                      <select
+                        value={expenseCategory}
+                        onChange={(e) => setExpenseCategory(e.target.value)}
+                        className="w-full px-5 py-3.5 bg-slate-50 dark:bg-dark-input border-2 border-slate-100 dark:border-dark-border rounded-xl outline-none focus:border-blue-600 transition-all font-bold cursor-pointer appearance-none text-sm"
+                      >
+                        {transactionType === 'expense' ? (
+                          categories.map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                          ))
+                        ) : (
+                          ['Renda Extra', 'Bônus', 'Presente', 'Investimento'].map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                          ))
+                        )}
+                      </select>
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-500 uppercase">Data</label>
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] ml-1">Data</label>
                     <input
                       type="date"
                       value={expenseDate}
                       onChange={(e) => setExpenseDate(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl outline-none focus:ring-2 focus:ring-red-500"
+                      className="w-full px-5 py-3.5 bg-slate-50 dark:bg-dark-input border-2 border-slate-100 dark:border-dark-border rounded-xl outline-none focus:border-blue-600 transition-all font-bold text-sm"
                     />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-500 uppercase">Forma de Pagamento</label>
-                    <select
-                      value={expensePaymentMethod}
-                      onChange={(e) => setExpensePaymentMethod(e.target.value as PaymentMethod)}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl outline-none focus:ring-2 focus:ring-red-500"
-                    >
-                      <option value="dinheiro">Dinheiro</option>
-                      <option value="pix">Pix</option>
-                      <option value="debito">Débito</option>
-                      <option value="credito">Crédito</option>
-                      <option value="transferencia">Transferência</option>
-                      <option value="outro">Outro</option>
-                    </select>
-                  </div>
-                  {expensePaymentMethod === 'credito' && (
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-slate-500 uppercase">Selecionar Cartão</label>
-                      <select
-                        value={expenseCardId}
-                        onChange={(e) => setExpenseCardId(e.target.value)}
-                        className="w-full px-4 py-3 bg-slate-50 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl outline-none focus:ring-2 focus:ring-red-500"
-                      >
-                        <option value="">Selecione um cartão</option>
-                        {state.cards.map(card => (
-                          <option key={card.id} value={card.id}>{card.name}</option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-500 uppercase">Parcelas</label>
-                    <input
-                      type="number"
-                      min="1"
-                      placeholder="Ex: 12"
-                      value={expenseInstallments}
-                      onChange={(e) => setExpenseInstallments(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl outline-none focus:ring-2 focus:ring-red-500"
-                    />
-                  </div>
-                  <div className="space-y-1 md:col-span-2">
-                    <label className="text-xs font-bold text-slate-500 uppercase">Recorrência (Frequência)</label>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                      {['none', 'weekly', 'monthly', 'yearly'].map((r) => (
-                        <button
-                          key={r}
-                          onClick={() => setExpenseRecurrence(r as any)}
-                          className={cn(
-                            "py-2 px-3 rounded-xl text-xs font-bold border transition-all",
-                            expenseRecurrence === r 
-                              ? "bg-red-500 text-white border-red-500 shadow-md" 
-                              : "bg-slate-50 dark:bg-dark-input text-slate-500 border-slate-200 dark:border-dark-border hover:border-red-500"
-                          )}
+                  {transactionType === 'expense' && (
+                    <>
+                      <div className="space-y-2">
+                        <label className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] ml-1">Pagamento</label>
+                        <select
+                          value={expensePaymentMethod}
+                          onChange={(e) => setExpensePaymentMethod(e.target.value as PaymentMethod)}
+                          className="w-full px-5 py-3.5 bg-slate-50 dark:bg-dark-input border-2 border-slate-100 dark:border-dark-border rounded-xl outline-none focus:border-blue-600 transition-all font-bold cursor-pointer appearance-none text-sm"
                         >
-                          {getRecurrenceLabel(r)}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                          <option value="dinheiro">Dinheiro</option>
+                          <option value="pix">Pix</option>
+                          <option value="debito">Débito</option>
+                          <option value="credito">Crédito</option>
+                          <option value="transferencia">Transferência</option>
+                          <option value="outro">Outro</option>
+                        </select>
+                      </div>
+                      {expensePaymentMethod === 'credito' && (
+                        <div className="space-y-2">
+                          <label className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] ml-1">Cartão</label>
+                          <select
+                            value={expenseCardId}
+                            onChange={(e) => setExpenseCardId(e.target.value)}
+                            className="w-full px-5 py-3.5 bg-slate-50 dark:bg-dark-input border-2 border-slate-100 dark:border-dark-border rounded-xl outline-none focus:border-blue-600 transition-all font-bold cursor-pointer appearance-none text-sm"
+                          >
+                            <option value="">Selecione um cartão</option>
+                            {state.cards.map(card => (
+                              <option key={card.id} value={card.id}>{card.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
-                <div className="flex gap-3">
+
+                <div className="flex flex-col sm:flex-row gap-3 pt-4">
                   <button 
                     onClick={editingExpense ? handleUpdateExpense : handleAddExpense}
-                    className="flex-1 py-3 bg-red-500 text-white font-bold rounded-xl shadow-lg shadow-red-500/20 hover:bg-red-600 transition-all"
+                    className="flex-[2] py-4 bg-blue-600 text-white font-black uppercase tracking-widest rounded-xl shadow-2xl shadow-blue-600/30 hover:bg-blue-700 transition-all active:scale-95 text-xs"
                   >
-                    {editingExpense ? 'Atualizar Despesa' : 'Salvar Despesa'}
+                    {editingExpense ? 'Atualizar Transação' : 'Confirmar Transação'}
                   </button>
                   <button 
                     onClick={resetExpenseForm}
-                    className="px-6 py-3 bg-slate-100 dark:bg-dark-hover text-slate-600 dark:text-slate-400 font-bold rounded-xl"
+                    className="flex-1 py-4 bg-slate-100 dark:bg-dark-hover text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest rounded-xl hover:bg-slate-200 transition-all text-xs"
                   >
-                    Cancelar
+                    Descartar
                   </button>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
 
-          <div className="bg-white dark:bg-dark-card rounded-3xl border border-slate-200 dark:border-dark-border shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-slate-100 dark:border-dark-border flex items-center justify-between">
-              <h4 className="font-bold">Lista de Despesas</h4>
-              <span className="text-xs font-bold px-3 py-1 bg-slate-100 dark:bg-dark-input rounded-full text-slate-500">
-                {state.transactions.filter(t => t.type === 'expense').length} itens
+          <div className="bg-white dark:bg-dark-card rounded-3xl border border-slate-200/60 dark:border-dark-border shadow-sm overflow-hidden group">
+            <div className="p-6 border-b border-slate-100 dark:border-dark-border flex items-center justify-between bg-slate-50/30 dark:bg-dark-hover/10">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-600/10 rounded-xl flex items-center justify-center">
+                  <RefreshCw className="w-5 h-5 text-blue-600" />
+                </div>
+                <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-[0.2em]">Histórico de Transações</h4>
+              </div>
+              <span className="text-[9px] font-black px-4 py-1.5 bg-white dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-full text-slate-500 shadow-sm uppercase tracking-widest">
+                {stats.monthlyTransactions.length} registros
               </span>
             </div>
             <div className="divide-y divide-slate-100 dark:divide-dark-border">
-              {stats.monthlyTransactions.filter(t => t.type === 'expense').length > 0 ? (
-                stats.monthlyTransactions.filter(t => t.type === 'expense').map((expense) => (
+              {stats.monthlyTransactions.length > 0 ? (
+                stats.monthlyTransactions.map((expense) => (
                   <motion.div 
                     key={expense.id}
                     layout
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50 dark:hover:bg-dark-hover/30 transition-colors group"
+                    className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:bg-slate-50/80 dark:hover:bg-dark-hover/30 transition-all group/item"
                   >
-                    <div className="flex items-center gap-4 min-w-0">
-                      <div className="flex-shrink-0 w-10 h-10 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-xl flex items-center justify-center">
-                        {expense.recurrence && expense.recurrence !== 'none' ? <RefreshCw className="w-5 h-5 animate-spin-slow" /> : <ArrowDownRight className="w-5 h-5" />}
+                    <div className="flex items-center gap-6 min-w-0">
+                      <div className={cn(
+                        "flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center shadow-sm transition-transform group-hover/item:scale-110",
+                        expense.type === 'expense' 
+                          ? "bg-red-50 dark:bg-red-500/10 text-red-500 border border-red-100 dark:border-red-500/20" 
+                          : "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 border border-emerald-100 dark:border-emerald-500/20"
+                      )}>
+                        {expense.recurrence && expense.recurrence !== 'none' ? <RefreshCw className="w-5 h-5" /> : (expense.type === 'expense' ? <ArrowDownRight className="w-5 h-5" /> : <ArrowUpRight className="w-5 h-5" />)}
                       </div>
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="font-bold truncate">{expense.description}</p>
+                      <div className="min-w-0 space-y-1.5">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <p className="text-xl font-black text-slate-900 dark:text-white truncate tracking-tighter leading-none">{expense.description}</p>
                           {expense.recurrence && expense.recurrence !== 'none' && (
-                            <span className="text-[10px] px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-500 rounded font-bold uppercase whitespace-nowrap">
+                            <span className={cn(
+                              "text-[8px] px-2.5 py-1 rounded-lg font-black uppercase tracking-[0.15em]",
+                              expense.type === 'expense' ? "bg-red-100 dark:bg-red-900/30 text-red-600" : "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600"
+                            )}>
                               {getRecurrenceLabel(expense.recurrence)}
                             </span>
                           )}
                           {expense.installments && expense.installments.total > 1 && (
-                            <span className="text-[10px] px-1.5 py-0.5 bg-blue-100 dark:bg-dark-input text-blue-500 rounded font-bold uppercase whitespace-nowrap">
+                            <span className="text-[8px] px-2.5 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-600 border border-blue-100 dark:border-blue-500/20 rounded-lg font-black uppercase tracking-[0.15em]">
                               {(() => {
                                 const tDate = new Date(expense.date);
                                 const diff = (selectedDate.getFullYear() * 12 + selectedDate.getMonth()) - (tDate.getFullYear() * 12 + tDate.getMonth());
@@ -652,48 +697,64 @@ export default function ExpensesTab({ state, updateState }: ExpensesTabProps) {
                             </span>
                           )}
                         </div>
-                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] sm:text-xs text-slate-500">
-                          <span className="flex items-center gap-1"><Tag className="w-3 h-3" /> {expense.category}</span>
-                          <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {new Date(expense.date).toLocaleDateString('pt-BR')}</span>
-                          {expense.paymentMethod && (
-                            <span className="flex items-center gap-1 capitalize">
-                              <CreditCardIcon className="w-3 h-3" /> 
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[9px] text-slate-400 font-black uppercase tracking-[0.2em]">
+                          <span className="flex items-center gap-2"><Tag className="w-3.5 h-3.5 text-slate-300" /> {expense.category}</span>
+                          <span className="flex items-center gap-2"><Calendar className="w-3.5 h-3.5 text-slate-300" /> {new Date(expense.date).toLocaleDateString('pt-BR')}</span>
+                          {expense.paymentMethod && expense.type === 'expense' && (
+                            <span className="flex items-center gap-2">
+                              <CreditCardIcon className="w-3.5 h-3.5 text-slate-300" /> 
                               {expense.paymentMethod === 'credito' ? `Cartão ${state.cards.find(c => c.id === expense.cardId)?.name || ''}` : expense.paymentMethod}
                             </span>
                           )}
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between sm:justify-end gap-4">
-                      <div className="text-right">
-                        <span className="block font-bold text-red-500">-{formatCurrency(expense.monthlyAmount || expense.amount)}</span>
+                    <div className="flex items-center justify-between sm:justify-end gap-8">
+                      <div className="text-right space-y-0.5">
+                        <span className={cn(
+                          "block text-2xl font-black tracking-tighter leading-none",
+                          expense.type === 'expense' ? "text-red-500" : "text-emerald-500"
+                        )}>
+                          {expense.type === 'expense' ? '-' : '+'}{formatCurrency(expense.monthlyAmount || expense.amount)}
+                        </span>
                         {expense.installments && expense.installments.total > 1 && (
-                          <span className="text-[10px] text-slate-400 font-medium">
+                          <span className="text-[9px] text-slate-400 font-black uppercase tracking-widest opacity-60">
                             Total: {formatCurrency(expense.amount)}
                           </span>
                         )}
                       </div>
-                      <div className="flex gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                      <div className="flex gap-1.5 opacity-0 group-hover/item:opacity-100 transition-all translate-x-3 group-hover/item:translate-x-0">
                         <button 
                           onClick={() => handleEditExpense(expense)}
-                          className="p-2 text-blue-500 md:text-slate-400 md:hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all"
+                          className="p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-all shadow-sm bg-white dark:bg-dark-card border border-slate-100 dark:border-dark-border"
                         >
-                          <Edit2 className="w-4 h-4" />
+                          <Edit2 className="w-4.5 h-4.5" />
                         </button>
                         <button 
                           onClick={() => deleteExpense(expense)}
-                          className="p-2 text-red-500 md:text-slate-400 md:hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                          className="p-3 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all shadow-sm bg-white dark:bg-dark-card border border-slate-100 dark:border-dark-border"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-4.5 h-4.5" />
                         </button>
                       </div>
                     </div>
                   </motion.div>
                 ))
               ) : (
-                <div className="p-12 text-center text-slate-400">
-                  <DollarSign className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                  <p>Nenhuma despesa registrada.</p>
+                <div className="p-20 text-center space-y-4">
+                  <div className="w-20 h-20 bg-slate-50 dark:bg-dark-input rounded-full flex items-center justify-center mx-auto border border-slate-100 dark:border-dark-border shadow-inner">
+                    <DollarSign className="w-10 h-10 text-slate-300" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <h4 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Nenhuma movimentação</h4>
+                    <p className="text-sm text-slate-500 font-medium">Você ainda não registrou transações para este mês.</p>
+                  </div>
+                  <button 
+                    onClick={() => setIsAddingExpense(true)}
+                    className="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-xl shadow-blue-600/20 hover:bg-blue-700 transition-all text-sm"
+                  >
+                    Registrar Primeira Transação
+                  </button>
                 </div>
               )}
             </div>

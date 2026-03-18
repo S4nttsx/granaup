@@ -18,7 +18,14 @@ export const INITIAL_STATE: AppState = {
   cryptos: [],
   cards: [],
   transactions: [],
+  customers: [],
+  suppliers: [],
+  sales: [],
+  payables: [],
+  receivables: [],
+  notifications: [],
   darkMode: false,
+  isCompanyMode: false,
 };
 
 export const CATEGORIES = [
@@ -32,5 +39,9 @@ export const CATEGORIES = [
   'Investimento',
   'Meta',
   'Cripto',
+  'Salário',
+  'Freelance',
+  'Venda',
+  'Presente',
   'Outros',
 ];
