@@ -26,6 +26,8 @@ export const INITIAL_STATE: AppState = {
   notifications: [],
   darkMode: false,
   isCompanyMode: false,
+  isCalculatorOpen: false,
+  savedNews: [],
 };
 
 export const CATEGORIES = [

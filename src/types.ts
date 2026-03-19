@@ -1,6 +1,6 @@
 import { LucideIcon } from 'lucide-react';
 
-export type TabType = 'dashboard' | 'metas' | 'investimentos' | 'cripto' | 'cartao' | 'config' | 'financeiro' | 'empresa' | 'salario' | 'noticias';
+export type TabType = 'dashboard' | 'metas' | 'investimentos' | 'cripto' | 'cartao' | 'config' | 'financeiro' | 'empresa' | 'salario' | 'noticias' | 'dicas' | 'calculadora' | 'simulador';
 
 export interface Customer {
   id: string;
@@ -116,6 +116,20 @@ export interface Receivable {
   received: boolean;
 }
 
+export interface NewsItem {
+  id: string;
+  title: string;
+  description: string;
+  content: string;
+  url: string;
+  image: string;
+  source: string;
+  publishedAt: string;
+  category: 'Brasil' | 'Internacional' | 'Combustíveis' | 'Política' | 'Mercado';
+  impact?: 'positive' | 'negative' | 'neutral';
+  simplifiedSummary?: string;
+}
+
 export interface AppState {
   user: User;
   salary: number;
@@ -140,4 +154,6 @@ export interface AppState {
   notifications: Notification[];
   darkMode: boolean;
   isCompanyMode: boolean;
+  isCalculatorOpen: boolean;
+  savedNews: NewsItem[];
 }

@@ -13,25 +13,13 @@ import {
   ChevronRight,
   RefreshCw,
   TrendingDown,
-  Info
+  Info,
+  Bookmark,
+  BookmarkCheck
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { GoogleGenAI } from "@google/genai";
-import { AppState } from '../types';
-
-interface NewsItem {
-  id: string;
-  title: string;
-  description: string;
-  content: string;
-  url: string;
-  image: string;
-  source: string;
-  publishedAt: string;
-  category: 'Brasil' | 'Internacional' | 'Combustíveis' | 'Política' | 'Mercado';
-  impact?: 'positive' | 'negative' | 'neutral';
-  simplifiedSummary?: string;
-}
+import { AppState, NewsItem } from '../types';
 
 interface NewsTabProps {
   state: AppState;
@@ -46,7 +34,7 @@ export default function NewsTab({ state, updateState }: NewsTabProps) {
   const [activeFilter, setActiveFilter] = useState<string>('Todos');
   const [analyzing, setAnalyzing] = useState<string | null>(null);
 
-  const filters = ['Todos', 'Brasil', 'Internacional', 'Combustíveis', 'Política', 'Mercado'];
+  const filters = ['Todos', 'Salvas', 'Brasil', 'Internacional', 'Combustíveis', 'Política', 'Mercado'];
 
   const fetchNews = async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
@@ -146,6 +134,17 @@ export default function NewsTab({ state, updateState }: NewsTabProps) {
         impact: result.impact, 
         simplifiedSummary: result.simplifiedSummary 
       } : n));
+
+      // Also update saved news if it's there
+      if (state.savedNews.some(n => n.id === item.id)) {
+        updateState({ 
+          savedNews: state.savedNews.map(n => n.id === item.id ? {
+            ...n,
+            impact: result.impact,
+            simplifiedSummary: result.simplifiedSummary
+          } : n)
+        });
+      }
     } catch (error) {
       console.error('Error analyzing news:', error);
     } finally {
@@ -153,14 +152,24 @@ export default function NewsTab({ state, updateState }: NewsTabProps) {
     }
   };
 
+  const toggleSave = (item: NewsItem) => {
+    const isSaved = state.savedNews.some(n => n.id === item.id);
+    if (isSaved) {
+      updateState({ savedNews: state.savedNews.filter(n => n.id !== item.id) });
+    } else {
+      updateState({ savedNews: [...state.savedNews, item] });
+    }
+  };
+
   const filteredNews = useMemo(() => {
-    return news.filter(item => {
+    const baseNews = activeFilter === 'Salvas' ? state.savedNews : news;
+    return baseNews.filter(item => {
       const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                            item.description.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesFilter = activeFilter === 'Todos' || item.category === activeFilter;
+      const matchesFilter = activeFilter === 'Todos' || activeFilter === 'Salvas' || item.category === activeFilter;
       return matchesSearch && matchesFilter;
     });
-  }, [news, searchQuery, activeFilter]);
+  }, [news, state.savedNews, searchQuery, activeFilter]);
 
   const trendingNews = useMemo(() => news.slice(0, 3), [news]);
 
@@ -211,13 +220,21 @@ export default function NewsTab({ state, updateState }: NewsTabProps) {
             key={filter}
             onClick={() => setActiveFilter(filter)}
             className={cn(
-              "px-6 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all border",
+              "px-6 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all border flex items-center gap-2",
               activeFilter === filter 
                 ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-600/20" 
                 : "bg-white dark:bg-dark-card text-slate-500 dark:text-slate-400 border-slate-200 dark:border-dark-border hover:border-blue-600/50"
             )}
           >
             {filter}
+            {filter === 'Salvas' && state.savedNews.length > 0 && (
+              <span className={cn(
+                "px-1.5 py-0.5 rounded-md text-[10px] font-black",
+                activeFilter === 'Salvas' ? "bg-white text-blue-600" : "bg-blue-600 text-white"
+              )}>
+                {state.savedNews.length}
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -332,6 +349,23 @@ export default function NewsTab({ state, updateState }: NewsTabProps) {
                               Resumir
                             </button>
                           )}
+
+                          <button 
+                            onClick={() => toggleSave(item)}
+                            className={cn(
+                              "p-2.5 rounded-xl transition-all border",
+                              state.savedNews.some(n => n.id === item.id)
+                                ? "bg-blue-600 border-blue-600 text-white"
+                                : "bg-white dark:bg-dark-hover border-slate-200 dark:border-dark-border text-slate-400 hover:text-blue-600"
+                            )}
+                            title={state.savedNews.some(n => n.id === item.id) ? "Remover dos salvos" : "Salvar para depois"}
+                          >
+                            {state.savedNews.some(n => n.id === item.id) ? (
+                              <BookmarkCheck className="w-4 h-4" />
+                            ) : (
+                              <Bookmark className="w-4 h-4" />
+                            )}
+                          </button>
                         </div>
 
                         {item.impact && (
@@ -355,8 +389,16 @@ export default function NewsTab({ state, updateState }: NewsTabProps) {
             </div>
           ) : (
             <div className="py-20 text-center bg-white dark:bg-dark-card rounded-[2.5rem] border border-dashed border-slate-200 dark:border-dark-border space-y-4">
-              <Search className="w-12 h-12 text-slate-300 mx-auto" />
-              <p className="text-slate-500 font-medium">Nenhuma notícia encontrada para sua busca.</p>
+              {activeFilter === 'Salvas' ? (
+                <Bookmark className="w-12 h-12 text-slate-300 mx-auto" />
+              ) : (
+                <Search className="w-12 h-12 text-slate-300 mx-auto" />
+              )}
+              <p className="text-slate-500 font-medium">
+                {activeFilter === 'Salvas' 
+                  ? 'Você ainda não salvou nenhuma notícia.' 
+                  : 'Nenhuma notícia encontrada para sua busca.'}
+              </p>
             </div>
           )}
         </div>

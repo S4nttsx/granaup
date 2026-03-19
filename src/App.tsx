@@ -16,7 +16,10 @@ import {
   Plus,
   Wallet,
   DollarSign,
-  Building2
+  Building2,
+  Lightbulb,
+  Calculator as CalcIcon,
+  Rocket
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { clsx, type ClassValue } from 'clsx';
@@ -36,6 +39,9 @@ import LoginScreen from './components/LoginScreen';
 import ExpensesTab from './components/ExpensesTab';
 import CompanyTab from './components/CompanyTab';
 import NewsTab from './components/NewsTab';
+import InvestmentTipsTab from './components/InvestmentTipsTab';
+import Calculator from './components/Calculator';
+import FutureSimulator from './components/FutureSimulator';
 import NotificationCenter from './components/NotificationCenter';
 
 function cn(...inputs: ClassValue[]) {
@@ -227,6 +233,9 @@ export default function App() {
     { id: 'cripto', label: 'Cripto', icon: Coins },
     { id: 'cartao', label: 'Cartão', icon: CreditCard },
     { id: 'noticias', label: 'Notícias', icon: Newspaper },
+    { id: 'dicas', label: 'Dicas de Investimento', icon: Lightbulb },
+    { id: 'calculadora', label: 'Calculadora', icon: CalcIcon },
+    { id: 'simulador', label: 'Simulador de Futuro', icon: Rocket },
     ...(state.isCompanyMode ? [{ id: 'empresa', label: 'Modo Empresa', icon: Building2 }] : []),
     { id: 'config', label: 'Configurações', icon: Settings },
   ];
@@ -241,6 +250,9 @@ export default function App() {
       case 'cartao': return <CardTab state={state} updateState={updateState} />;
       case 'empresa': return <CompanyTab state={state} updateState={updateState} />;
       case 'noticias': return <NewsTab state={state} updateState={updateState} />;
+      case 'dicas': return <InvestmentTipsTab state={state} updateState={updateState} />;
+      case 'calculadora': return <Calculator state={state} updateState={updateState} />;
+      case 'simulador': return <FutureSimulator state={state} updateState={updateState} />;
       case 'config': return <SettingsTab state={state} updateState={updateState} />;
       default: return <Dashboard state={state} updateState={updateState} />;
     }
@@ -258,6 +270,24 @@ export default function App() {
             onClick={() => setIsSidebarOpen(false)}
             className="fixed inset-0 bg-slate-900/40 z-40 lg:hidden backdrop-blur-md"
           />
+        )}
+      </AnimatePresence>
+
+      {/* Floating Calculator Button */}
+      {!state.isCalculatorOpen && (
+        <button
+          onClick={() => updateState({ isCalculatorOpen: true })}
+          className="fixed bottom-8 right-8 w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-2xl shadow-blue-600/30 hover:bg-blue-700 transition-all active:scale-95 z-[999]"
+          title="Abrir Calculadora Flutuante"
+        >
+          <CalcIcon className="w-6 h-6" />
+        </button>
+      )}
+
+      {/* Pop-up Calculator */}
+      <AnimatePresence>
+        {state.isCalculatorOpen && (
+          <Calculator state={state} updateState={updateState} isPopup />
         )}
       </AnimatePresence>
 
