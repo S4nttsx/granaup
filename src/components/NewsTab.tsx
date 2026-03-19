@@ -113,7 +113,7 @@ export default function NewsTab({ state, updateState }: NewsTabProps) {
     setAnalyzing(item.id);
 
     try {
-      const apiKey = process.env.GEMINI_API_KEY;
+      const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
       if (!apiKey || apiKey === 'undefined' || apiKey === '') {
         console.warn('GEMINI_API_KEY não configurada. A análise de notícias não funcionará.');
         return;

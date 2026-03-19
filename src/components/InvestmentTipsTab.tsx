@@ -76,9 +76,9 @@ export default function InvestmentTipsTab({ state, updateState }: InvestmentTips
       }
 
       // 2. Analyze with Gemini
-      const apiKey = process.env.GEMINI_API_KEY;
+      const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
       if (!apiKey || apiKey === 'undefined' || apiKey === '') {
-        throw new Error('Chave da API Gemini não configurada. Por favor, adicione GEMINI_API_KEY nas configurações (ícone de engrenagem > Secrets).');
+        throw new Error('Chave da API Gemini não configurada. Por favor, adicione GEMINI_API_KEY nas configurações (ícone de engrenagem > Secrets) ou use o botão "Configurar Chave". Obtenha uma chave em: https://aistudio.google.com/app/apikey');
       }
 
       const ai = new GoogleGenAI({ apiKey });
@@ -172,6 +172,14 @@ export default function InvestmentTipsTab({ state, updateState }: InvestmentTips
 
   const cn = (...classes: any[]) => classes.filter(Boolean).join(' ');
 
+  const handleOpenSelectKey = async () => {
+    if ((window as any).aistudio?.openSelectKey) {
+      await (window as any).aistudio.openSelectKey();
+      // After selecting, try to fetch again
+      fetchTips();
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto space-y-8 pb-20">
       {/* Header */}
@@ -188,18 +196,29 @@ export default function InvestmentTipsTab({ state, updateState }: InvestmentTips
           <p className="text-slate-500 font-medium ml-1">Análise inteligente baseada nas últimas notícias do mercado.</p>
         </div>
 
-        <button 
-          onClick={fetchTips}
-          disabled={loading}
-          className="flex items-center gap-2 px-6 py-3.5 bg-amber-500 text-white font-bold rounded-2xl hover:bg-amber-600 transition-all shadow-lg shadow-amber-500/25 disabled:opacity-50 group"
-        >
-          {loading ? (
-            <RefreshCw className="w-5 h-5 animate-spin" />
-          ) : (
-            <Zap className="w-5 h-5 group-hover:scale-110 transition-transform" />
+        <div className="flex items-center gap-3">
+          {(window as any).aistudio && (
+            <button 
+              onClick={handleOpenSelectKey}
+              className="flex items-center gap-2 px-6 py-3.5 bg-slate-900 text-white font-bold rounded-2xl hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/25 group"
+            >
+              <ShieldCheck className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              Configurar Chave
+            </button>
           )}
-          Atualizar Dicas
-        </button>
+          <button 
+            onClick={fetchTips}
+            disabled={loading}
+            className="flex items-center gap-2 px-6 py-3.5 bg-amber-500 text-white font-bold rounded-2xl hover:bg-amber-600 transition-all shadow-lg shadow-amber-500/25 disabled:opacity-50 group"
+          >
+            {loading ? (
+              <RefreshCw className="w-5 h-5 animate-spin" />
+            ) : (
+              <Zap className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            )}
+            Atualizar Dicas
+          </button>
+        </div>
       </div>
 
       {/* Stats/Info Bar */}
