@@ -113,7 +113,12 @@ export default function NewsTab({ state, updateState }: NewsTabProps) {
     setAnalyzing(item.id);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey || apiKey === 'undefined' || apiKey === '') {
+        console.warn('GEMINI_API_KEY não configurada. A análise de notícias não funcionará.');
+        return;
+      }
+      const ai = new GoogleGenAI({ apiKey });
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: `Analise esta notícia econômica e retorne um JSON com:

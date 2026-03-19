@@ -126,6 +126,7 @@ export default function SalaryTab({ state, updateState }: SalaryTabProps) {
                   type="number" 
                   value={salaryInput}
                   onChange={(e) => setSalaryInput(e.target.value)}
+                  onFocus={(e) => salaryInput === '0' && setSalaryInput('')}
                   className="w-full pl-14 pr-5 py-4 bg-slate-50 dark:bg-dark-input border-2 border-slate-100 dark:border-dark-border rounded-2xl outline-none focus:border-emerald-600 text-2xl font-black tracking-tighter transition-all"
                   placeholder="0,00"
                 />

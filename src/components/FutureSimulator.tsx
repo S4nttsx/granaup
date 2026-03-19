@@ -101,6 +101,7 @@ export default function FutureSimulator({ state, updateState }: FutureSimulatorP
                     type="number"
                     value={salary}
                     onChange={(e) => setSalary(e.target.value)}
+                    onFocus={(e) => e.target.value === '0' && setSalary('')}
                     className="block w-full pl-11 pr-4 py-4 bg-slate-50 dark:bg-dark-hover border-none rounded-2xl text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-emerald-500 transition-all"
                     placeholder="0,00"
                   />
@@ -117,6 +118,7 @@ export default function FutureSimulator({ state, updateState }: FutureSimulatorP
                     type="number"
                     value={monthlySavings}
                     onChange={(e) => setMonthlySavings(e.target.value)}
+                    onFocus={(e) => e.target.value === '0' && setMonthlySavings('')}
                     className="block w-full pl-11 pr-4 py-4 bg-slate-50 dark:bg-dark-hover border-none rounded-2xl text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-emerald-500 transition-all"
                     placeholder="0,00"
                   />
@@ -136,6 +138,7 @@ export default function FutureSimulator({ state, updateState }: FutureSimulatorP
                     type="number"
                     value={annualReturn}
                     onChange={(e) => setAnnualReturn(e.target.value)}
+                    onFocus={(e) => e.target.value === '0' && setAnnualReturn('')}
                     className="block w-full pl-11 pr-4 py-4 bg-slate-50 dark:bg-dark-hover border-none rounded-2xl text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-blue-500 transition-all"
                     placeholder="10"
                   />
@@ -188,11 +191,12 @@ export default function FutureSimulator({ state, updateState }: FutureSimulatorP
             </div>
 
             <div className="relative z-10 space-y-8">
-              <div className="space-y-2">
-                <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Em {years} anos você terá:</p>
-                <h3 className="text-6xl font-black text-slate-900 dark:text-white tracking-tighter">
+              <div className="text-center space-y-4">
+                <p className="text-sm font-black text-slate-400 uppercase tracking-[0.3em]">Em {years} anos você terá:</p>
+                <h3 className="text-7xl font-black text-blue-600 dark:text-blue-400 tracking-tighter drop-shadow-sm">
                   {formatCurrency(finalBalance)}
                 </h3>
+                <div className="w-24 h-1.5 bg-blue-600 mx-auto rounded-full opacity-20" />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

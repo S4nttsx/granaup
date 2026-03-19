@@ -15,7 +15,8 @@ import {
   X,
   ChevronRight,
   Building2,
-  CheckCircle2
+  CheckCircle2,
+  AlertCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { GoogleGenAI, Type } from "@google/genai";
@@ -41,12 +42,14 @@ interface InvestmentTipsTabProps {
 
 export default function InvestmentTipsTab({ state, updateState }: InvestmentTipsTabProps) {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [tips, setTips] = useState<Tip[]>([]);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [selectedTip, setSelectedTip] = useState<Tip | null>(null);
 
   const fetchTips = async () => {
     setLoading(true);
+    setError(null);
     try {
       // 1. Fetch News (General Finance + Crypto)
       const feeds = [
@@ -73,14 +76,19 @@ export default function InvestmentTipsTab({ state, updateState }: InvestmentTips
       }
 
       // 2. Analyze with Gemini
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey || apiKey === 'undefined' || apiKey === '') {
+        throw new Error('Chave da API Gemini não configurada. Por favor, adicione GEMINI_API_KEY nas configurações (ícone de engrenagem > Secrets).');
+      }
+
+      const ai = new GoogleGenAI({ apiKey });
 
       const prompt = `Você é um analista financeiro sênior. Com base nas seguintes notícias recentes do mercado financeiro e cripto, gere 4 dicas de investimento acionáveis para o mercado brasileiro.
       Divida as dicas entre Curto Prazo (até 1 ano) e Longo Prazo (mais de 2 anos).
       Considere o cenário econômico atual (inflação, juros, tendências cripto).
       
       Notícias:
-      ${allNews.join('\n')}
+      ${allNews.length > 0 ? allNews.join('\n') : 'Nenhuma notícia recente encontrada. Use seu conhecimento geral do mercado financeiro atual para gerar dicas relevantes.'}
       
       Retorne um JSON com um array de objetos chamado 'tips', cada um com:
       - title: Título curto da dica
@@ -95,7 +103,7 @@ export default function InvestmentTipsTab({ state, updateState }: InvestmentTips
 
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        contents: prompt,
         config: { 
           responseMimeType: "application/json",
           responseSchema: {
@@ -133,11 +141,24 @@ export default function InvestmentTipsTab({ state, updateState }: InvestmentTips
         }
       });
 
-      const result = JSON.parse(response.text || '{"tips": []}');
-      setTips(result.tips);
-      setLastUpdated(new Date().toLocaleTimeString('pt-BR'));
-    } catch (error) {
+      let jsonText = response.text || '';
+      // Clean up markdown if present
+      if (jsonText.includes('```json')) {
+        jsonText = jsonText.split('```json')[1].split('```')[0].trim();
+      } else if (jsonText.includes('```')) {
+        jsonText = jsonText.split('```')[1].split('```')[0].trim();
+      }
+
+      const result = JSON.parse(jsonText || '{"tips": []}');
+      if (result.tips && Array.isArray(result.tips)) {
+        setTips(result.tips);
+        setLastUpdated(new Date().toLocaleTimeString('pt-BR'));
+      } else {
+        console.error('Invalid tips format from AI:', result);
+      }
+    } catch (error: any) {
       console.error('Error generating tips:', error);
+      setError(error.message || 'Erro ao gerar dicas de investimento.');
     } finally {
       setLoading(false);
     }
@@ -219,7 +240,25 @@ export default function InvestmentTipsTab({ state, updateState }: InvestmentTips
             Array(4).fill(0).map((_, i) => (
               <div key={i} className="h-64 bg-white dark:bg-dark-card rounded-[2.5rem] border border-slate-200 dark:border-dark-border animate-pulse" />
             ))
-          ) : (
+          ) : error ? (
+            <div className="col-span-full py-20 text-center space-y-4">
+              <div className="w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto">
+                <AlertCircle className="w-10 h-10 text-red-500" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Erro ao carregar dicas</h3>
+                <p className="text-slate-500 max-w-md mx-auto">
+                  {error}
+                </p>
+                <button 
+                  onClick={fetchTips}
+                  className="mt-4 px-6 py-2 bg-amber-500 text-white font-bold rounded-xl hover:bg-amber-600 transition-all"
+                >
+                  Tentar Novamente
+                </button>
+              </div>
+            </div>
+          ) : tips.length > 0 ? (
             tips.map((tip, index) => (
               <motion.div
                 key={index}
@@ -282,6 +321,24 @@ export default function InvestmentTipsTab({ state, updateState }: InvestmentTips
                 </div>
               </motion.div>
             ))
+          ) : (
+            <div className="col-span-full py-20 text-center space-y-4">
+              <div className="w-20 h-20 bg-slate-100 dark:bg-dark-hover rounded-full flex items-center justify-center mx-auto">
+                <AlertCircle className="w-10 h-10 text-slate-400" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Nenhuma dica disponível</h3>
+                <p className="text-slate-500 max-w-md mx-auto">
+                  Não foi possível gerar dicas de investimento no momento. Verifique sua conexão ou tente novamente mais tarde.
+                </p>
+                <button 
+                  onClick={fetchTips}
+                  className="mt-4 px-6 py-2 bg-amber-500 text-white font-bold rounded-xl hover:bg-amber-600 transition-all"
+                >
+                  Tentar Novamente
+                </button>
+              </div>
+            </div>
           )}
         </AnimatePresence>
       </div>

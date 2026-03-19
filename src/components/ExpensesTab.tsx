@@ -560,6 +560,7 @@ export default function ExpensesTab({ state, updateState, categories = CATEGORIE
                         placeholder="0,00"
                         value={expenseValue}
                         onChange={(e) => setExpenseValue(e.target.value)}
+                        onFocus={(e) => expenseValue === '0' && setExpenseValue('')}
                         className="w-full pl-14 pr-5 py-3.5 bg-slate-50 dark:bg-dark-input border-2 border-slate-100 dark:border-dark-border rounded-xl outline-none focus:border-blue-600 transition-all text-xl font-black tracking-tighter"
                       />
                     </div>
