@@ -44,6 +44,7 @@ export default function ExpensesTab({ state, updateState, categories = CATEGORIE
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isAddingExpense, setIsAddingExpense] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Transaction | null>(null);
+  const [expenseToDelete, setExpenseToDelete] = useState<Transaction | null>(null);
   
   const currentMonthName = selectedDate.toLocaleString('pt-BR', { month: 'long' });
   const capitalizedMonth = currentMonthName.charAt(0).toUpperCase() + currentMonthName.slice(1);
@@ -73,6 +74,15 @@ export default function ExpensesTab({ state, updateState, categories = CATEGORIE
 
   // Process recurring expenses on mount
   useEffect(() => {
+    if (state.editingTransactionId) {
+      const transaction = state.transactions.find(t => t.id === state.editingTransactionId);
+      if (transaction) {
+        handleEditExpense(transaction);
+        // Clear it so it doesn't re-open
+        updateState({ editingTransactionId: null });
+      }
+    }
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
@@ -332,19 +342,36 @@ export default function ExpensesTab({ state, updateState, categories = CATEGORIE
 
   const deleteExpense = (expense: Transaction) => {
     let updatedCards = [...state.cards];
-    if (expense.paymentMethod === 'credito' && expense.cardId) {
-      updatedCards = updatedCards.map(c => {
-        if (c.id === expense.cardId) {
-          return { ...c, currentBill: Math.max(0, c.currentBill - expense.amount) };
+    
+    // If it's a parent, delete all children too
+    const idsToDelete = [expense.id];
+    if (expense.recurrence && expense.recurrence !== 'none' && !expense.parentTransactionId) {
+      state.transactions.forEach(t => {
+        if (t.parentTransactionId === expense.id) {
+          idsToDelete.push(t.id);
         }
-        return c;
       });
     }
 
+    // Revert card bill for all deleted transactions if they were credit
+    const transactionsToDelete = state.transactions.filter(t => idsToDelete.includes(t.id));
+    
+    transactionsToDelete.forEach(t => {
+      if (t.paymentMethod === 'credito' && t.cardId) {
+        updatedCards = updatedCards.map(c => {
+          if (c.id === t.cardId) {
+            return { ...c, currentBill: Math.max(0, c.currentBill - t.amount) };
+          }
+          return c;
+        });
+      }
+    });
+
     updateState({ 
-      transactions: state.transactions.filter(t => t.id !== expense.id),
+      transactions: state.transactions.filter(t => !idsToDelete.includes(t.id)),
       cards: updatedCards
     });
+    setExpenseToDelete(null);
   };
 
   const getRecurrenceLabel = (r?: string) => {
@@ -769,7 +796,7 @@ export default function ExpensesTab({ state, updateState, categories = CATEGORIE
                           <Edit2 className="w-4.5 h-4.5" />
                         </button>
                         <button 
-                          onClick={() => deleteExpense(expense)}
+                          onClick={() => setExpenseToDelete(expense)}
                           className="p-3 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all shadow-sm bg-white dark:bg-dark-card border border-slate-100 dark:border-dark-border"
                         >
                           <Trash2 className="w-4.5 h-4.5" />
@@ -799,6 +826,55 @@ export default function ExpensesTab({ state, updateState, categories = CATEGORIE
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {expenseToDelete && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white dark:bg-dark-card p-8 rounded-3xl border border-slate-200 dark:border-dark-border shadow-2xl max-w-md w-full space-y-6"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-red-100 dark:bg-red-500/10 rounded-2xl flex items-center justify-center">
+                  <Trash2 className="w-6 h-6 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Excluir Transação?</h3>
+                  <p className="text-xs text-slate-500 font-medium uppercase tracking-widest">Esta ação não pode ser desfeita.</p>
+                </div>
+              </div>
+
+              <div className="p-4 bg-slate-50 dark:bg-dark-input rounded-2xl border border-slate-100 dark:border-dark-border">
+                <p className="text-sm font-bold text-slate-900 dark:text-white">{expenseToDelete.description}</p>
+                <p className="text-lg font-black text-red-600 tracking-tighter">{formatCurrency(expenseToDelete.amount)}</p>
+                {expenseToDelete.recurrence && expenseToDelete.recurrence !== 'none' && !expenseToDelete.parentTransactionId && (
+                  <p className="text-[10px] text-red-500 font-bold mt-2 uppercase tracking-widest">
+                    ⚠️ Atenção: Todas as instâncias recorrentes desta despesa também serão excluídas.
+                  </p>
+                )}
+              </div>
+
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => deleteExpense(expenseToDelete)}
+                  className="flex-1 py-4 bg-red-600 text-white font-black uppercase tracking-widest rounded-xl hover:bg-red-700 transition-all active:scale-95 text-xs shadow-xl shadow-red-600/20"
+                >
+                  Sim, Excluir
+                </button>
+                <button 
+                  onClick={() => setExpenseToDelete(null)}
+                  className="flex-1 py-4 bg-slate-100 dark:bg-dark-hover text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest rounded-xl hover:bg-slate-200 transition-all text-xs"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

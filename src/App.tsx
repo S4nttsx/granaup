@@ -240,7 +240,7 @@ export default function App() {
 
   const renderTab = () => {
     switch (activeTab) {
-      case 'dashboard': return <Dashboard state={state} updateState={updateState} />;
+      case 'dashboard': return <Dashboard state={state} updateState={updateState} setActiveTab={setActiveTab} />;
       case 'salario': return <SalaryTab state={state} updateState={updateState} />;
       case 'metas': return <GoalsTab state={state} updateState={updateState} />;
       case 'investimentos': return <InvestmentsTab state={state} updateState={updateState} />;
@@ -251,7 +251,7 @@ export default function App() {
       case 'calculadora': return <Calculator state={state} updateState={updateState} />;
       case 'simulador': return <FutureSimulator state={state} updateState={updateState} />;
       case 'config': return <SettingsTab state={state} updateState={updateState} />;
-      default: return <Dashboard state={state} updateState={updateState} />;
+      default: return <Dashboard state={state} updateState={updateState} setActiveTab={setActiveTab} />;
     }
   };
 

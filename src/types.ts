@@ -156,4 +156,5 @@ export interface AppState {
   isCompanyMode: boolean;
   isCalculatorOpen: boolean;
   savedNews: NewsItem[];
+  editingTransactionId?: string | null;
 }

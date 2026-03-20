@@ -7,6 +7,8 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Plus,
+  Trash2,
+  Edit2,
   ChevronLeft,
   ChevronRight,
   Calendar as CalendarIcon,
@@ -31,19 +33,49 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { AppState, Transaction } from '../types';
+import { AppState, Transaction, TabType } from '../types';
 
 interface DashboardProps {
   state: AppState;
   updateState: (updates: Partial<AppState>) => void;
+  setActiveTab: (tab: TabType) => void;
 }
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export default function Dashboard({ state, updateState }: DashboardProps) {
+export default function Dashboard({ state, updateState, setActiveTab }: DashboardProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [expenseToDelete, setExpenseToDelete] = useState<Transaction | null>(null);
+
+  const deleteExpense = (expense: Transaction) => {
+    let updatedCards = [...state.cards];
+    const idsToDelete = [expense.id];
+    if (expense.recurrence && expense.recurrence !== 'none' && !expense.parentTransactionId) {
+      state.transactions.forEach(t => {
+        if (t.parentTransactionId === expense.id) {
+          idsToDelete.push(t.id);
+        }
+      });
+    }
+    const transactionsToDelete = state.transactions.filter(t => idsToDelete.includes(t.id));
+    transactionsToDelete.forEach(t => {
+      if (t.paymentMethod === 'credito' && t.cardId) {
+        updatedCards = updatedCards.map(c => {
+          if (c.id === t.cardId) {
+            return { ...c, currentBill: Math.max(0, c.currentBill - t.amount) };
+          }
+          return c;
+        });
+      }
+    });
+    updateState({ 
+      transactions: state.transactions.filter(t => !idsToDelete.includes(t.id)),
+      cards: updatedCards
+    });
+    setExpenseToDelete(null);
+  };
 
   const currentMonthName = selectedDate.toLocaleString('pt-BR', { month: 'long' });
   const capitalizedMonth = currentMonthName.charAt(0).toUpperCase() + currentMonthName.slice(1);
@@ -638,14 +670,36 @@ export default function Dashboard({ state, updateState }: DashboardProps) {
                           </div>
                         </div>
                       </div>
-                      <div className="text-center sm:text-right w-full sm:w-auto pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-200/50">
-                        <p className={cn(
-                          "text-xl font-black tracking-tighter",
-                          t.type === 'income' ? "text-emerald-600" : "text-red-600"
-                        )}>
-                          {t.type === 'income' ? '+' : '-'}{formatCurrency(t.monthlyAmount)}
-                        </p>
-                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mt-0.5">Processado</p>
+                      <div className="text-center sm:text-right w-full sm:w-auto pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-200/50 flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-4">
+                        <div className="text-left sm:text-right">
+                          <p className={cn(
+                            "text-xl font-black tracking-tighter",
+                            t.type === 'income' ? "text-emerald-600" : "text-red-600"
+                          )}>
+                            {t.type === 'income' ? '+' : '-'}{formatCurrency(t.monthlyAmount)}
+                          </p>
+                          <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mt-0.5">Processado</p>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              updateState({ editingTransactionId: t.id });
+                              setActiveTab('salario');
+                            }}
+                            className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all"
+                            title="Editar"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => setExpenseToDelete(t)}
+                            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                            title="Excluir"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ));
@@ -662,6 +716,53 @@ export default function Dashboard({ state, updateState }: DashboardProps) {
             </div>
           </div>
         </motion.div>
+      </AnimatePresence>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {expenseToDelete && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white dark:bg-dark-card w-full max-w-md rounded-3xl p-8 shadow-2xl border border-slate-200 dark:border-dark-border"
+            >
+              <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <Trash2 className="w-8 h-8 text-red-600" />
+              </div>
+              
+              <div className="text-center space-y-2 mb-8">
+                <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Excluir Transação?</h3>
+                <p className="text-sm text-slate-500 font-medium">
+                  Você está prestes a excluir <span className="font-bold text-slate-900 dark:text-white">"{expenseToDelete.description}"</span>.
+                </p>
+                {expenseToDelete.recurrence && expenseToDelete.recurrence !== 'none' && !expenseToDelete.parentTransactionId && (
+                  <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/20 rounded-2xl">
+                    <p className="text-xs text-amber-700 dark:text-amber-400 font-bold leading-relaxed">
+                      ⚠️ Esta é uma despesa recorrente. Excluí-la removerá todas as parcelas/ocorrências futuras associadas.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  onClick={() => setExpenseToDelete(null)}
+                  className="py-4 px-6 bg-slate-100 dark:bg-dark-input text-slate-600 dark:text-slate-400 font-bold rounded-2xl hover:bg-slate-200 dark:hover:bg-dark-hover transition-all"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => deleteExpense(expenseToDelete)}
+                  className="py-4 px-6 bg-red-600 text-white font-bold rounded-2xl shadow-xl shadow-red-600/30 hover:bg-red-700 transition-all"
+                >
+                  Confirmar Exclusão
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
       </AnimatePresence>
     </div>
   );
