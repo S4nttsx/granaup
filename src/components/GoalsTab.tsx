@@ -237,7 +237,7 @@ export default function GoalsTab({ state, updateState }: GoalsTabProps) {
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-1">{goal.category}</p>
                     </div>
                   </div>
-                  <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex gap-2 transition-opacity">
                     <button onClick={() => handleEdit(goal)} className="p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-all">
                       <Edit2 className="w-5 h-5" />
                     </button>

@@ -788,7 +788,7 @@ export default function ExpensesTab({ state, updateState, categories = CATEGORIE
                           </span>
                         )}
                       </div>
-                      <div className="flex gap-1.5 opacity-0 group-hover/item:opacity-100 transition-all translate-x-3 group-hover/item:translate-x-0">
+                      <div className="flex gap-1.5 transition-all">
                         <button 
                           onClick={() => handleEditExpense(expense)}
                           className="p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-all shadow-sm bg-white dark:bg-dark-card border border-slate-100 dark:border-dark-border"

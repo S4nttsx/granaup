@@ -400,7 +400,7 @@ export default function CryptoTab({ state, updateState }: CryptoTabProps) {
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-1">{crypto.amount.toFixed(6)} {crypto.symbol}</p>
                     </div>
                   </div>
-                  <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex gap-2 transition-opacity">
                     <button 
                       onClick={() => setContributingCrypto(crypto)}
                       className="p-3 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-xl transition-all"

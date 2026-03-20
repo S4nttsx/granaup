@@ -224,7 +224,7 @@ export default function CardTab({ state, updateState }: CardTabProps) {
                       </div>
                     </div>
                   </div>
-                  <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all translate-x-3 group-hover:translate-x-0">
+                  <div className="flex gap-1.5 transition-all">
                     <button onClick={() => handleEdit(card)} className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-all">
                       <Edit2 className="w-4 h-4" />
                     </button>

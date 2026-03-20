@@ -594,7 +594,7 @@ export default function CompanyTab({ state, updateState }: CompanyTabProps) {
                         </button>
                       </td>
                       <td className="px-4 py-4 bg-slate-50 dark:bg-dark-input rounded-r-2xl border-y border-r border-slate-100 dark:border-dark-border text-right">
-                        <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center justify-end gap-1.5 transition-opacity">
                           <button 
                             onClick={() => handleEditPayable(item)}
                             className="p-2 text-slate-400 hover:text-blue-600 hover:bg-white dark:hover:bg-dark-card rounded-lg transition-all shadow-sm"
@@ -674,7 +674,7 @@ export default function CompanyTab({ state, updateState }: CompanyTabProps) {
                         </button>
                       </td>
                       <td className="px-4 py-4 bg-slate-50 dark:bg-dark-input rounded-r-2xl border-y border-r border-slate-100 dark:border-dark-border text-right">
-                        <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center justify-end gap-1.5 transition-opacity">
                           <button 
                             onClick={() => handleEditReceivable(item)}
                             className="p-2 text-slate-400 hover:text-blue-600 hover:bg-white dark:hover:bg-dark-card rounded-lg transition-all shadow-sm"

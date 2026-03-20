@@ -469,7 +469,7 @@ export default function InvestmentsTab({ state, updateState }: InvestmentsTabPro
                         </span>
                       </td>
                       <td className="px-8 py-6 text-right">
-                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex justify-end gap-2 transition-opacity">
                           <button 
                             onClick={() => setContributingInv(inv)}
                             className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all"
