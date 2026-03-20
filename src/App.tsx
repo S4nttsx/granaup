@@ -39,7 +39,6 @@ import LoginScreen from './components/LoginScreen';
 import ExpensesTab from './components/ExpensesTab';
 import CompanyTab from './components/CompanyTab';
 import NewsTab from './components/NewsTab';
-import InvestmentTipsTab from './components/InvestmentTipsTab';
 import Calculator from './components/Calculator';
 import FutureSimulator from './components/FutureSimulator';
 import NotificationCenter from './components/NotificationCenter';
@@ -233,7 +232,6 @@ export default function App() {
     { id: 'cripto', label: 'Cripto', icon: Coins },
     { id: 'cartao', label: 'Cartão', icon: CreditCard },
     { id: 'noticias', label: 'Notícias', icon: Newspaper },
-    { id: 'dicas', label: 'Dicas de Investimento', icon: Lightbulb },
     { id: 'calculadora', label: 'Calculadora', icon: CalcIcon },
     { id: 'simulador', label: 'Simulador de Futuro', icon: Rocket },
     ...(state.isCompanyMode ? [{ id: 'empresa', label: 'Modo Empresa', icon: Building2 }] : []),
@@ -250,7 +248,6 @@ export default function App() {
       case 'cartao': return <CardTab state={state} updateState={updateState} />;
       case 'empresa': return <CompanyTab state={state} updateState={updateState} />;
       case 'noticias': return <NewsTab state={state} updateState={updateState} />;
-      case 'dicas': return <InvestmentTipsTab state={state} updateState={updateState} />;
       case 'calculadora': return <Calculator state={state} updateState={updateState} />;
       case 'simulador': return <FutureSimulator state={state} updateState={updateState} />;
       case 'config': return <SettingsTab state={state} updateState={updateState} />;

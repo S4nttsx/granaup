@@ -1,6 +1,6 @@
 import { LucideIcon } from 'lucide-react';
 
-export type TabType = 'dashboard' | 'metas' | 'investimentos' | 'cripto' | 'cartao' | 'config' | 'financeiro' | 'empresa' | 'salario' | 'noticias' | 'dicas' | 'calculadora' | 'simulador';
+export type TabType = 'dashboard' | 'metas' | 'investimentos' | 'cripto' | 'cartao' | 'config' | 'financeiro' | 'empresa' | 'salario' | 'noticias' | 'calculadora' | 'simulador';
 
 export interface Customer {
   id: string;
