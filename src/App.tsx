@@ -265,7 +265,7 @@ export default function App() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsSidebarOpen(false)}
-            className="fixed inset-0 bg-slate-900/40 z-40 lg:hidden backdrop-blur-md"
+            className="fixed inset-0 bg-slate-900/40 z-40 md:hidden backdrop-blur-md"
           />
         )}
       </AnimatePresence>
@@ -290,7 +290,7 @@ export default function App() {
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-dark-card border-r border-slate-200/60 dark:border-dark-border transition-all duration-500 ease-in-out lg:translate-x-0 lg:static",
+        "fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-dark-card border-r border-slate-200/60 dark:border-dark-border transition-all duration-500 ease-in-out md:translate-x-0 md:static",
         isSidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="flex flex-col h-full">
@@ -365,8 +365,8 @@ export default function App() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-50/50 dark:bg-dark-bg/50">
         {/* Header */}
-        <header className="h-16 flex items-center justify-between px-6 bg-white/60 dark:bg-dark-bg/60 backdrop-blur-xl border-b border-slate-200/60 dark:border-dark-border/50 sticky top-0 z-30">
-          <div className="flex items-center gap-4 lg:hidden">
+        <header className="h-16 flex items-center justify-between px-4 md:px-6 bg-white/60 dark:bg-dark-bg/60 backdrop-blur-xl border-b border-slate-200/60 dark:border-dark-border/50 sticky top-0 z-30">
+          <div className="flex items-center gap-4 md:hidden">
             <button 
               onClick={() => setIsSidebarOpen(true)}
               className="p-2 rounded-xl bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border shadow-sm hover:bg-slate-50 dark:hover:bg-dark-hover transition-all"
@@ -381,7 +381,7 @@ export default function App() {
             </div>
           </div>
           
-          <div className="hidden lg:block">
+          <div className="hidden md:block">
             <div className="flex items-center gap-3">
               <div className="w-1 h-6 bg-blue-600 rounded-full" />
               <h2 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
@@ -396,7 +396,7 @@ export default function App() {
         </header>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto p-4 lg:p-6">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6">
           <motion.div
             key={activeTab}
             initial={{ opacity: 0, y: 20 }}

@@ -407,17 +407,17 @@ export default function ExpensesTab({ state, updateState, categories = CATEGORIE
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 flex-[2]">
-          <div className="bg-white dark:bg-dark-card p-6 rounded-2xl border border-slate-200/60 dark:border-dark-border shadow-sm group relative overflow-hidden">
+          <div className="bg-white dark:bg-dark-card p-4 sm:p-6 rounded-2xl border border-slate-200/60 dark:border-dark-border shadow-sm group relative overflow-hidden">
             <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/5 rounded-full -mr-10 -mt-10 group-hover:scale-150 transition-transform duration-700" />
             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-1.5">Entradas</p>
             <p className="text-xl font-black text-emerald-600 tracking-tighter">{formatCurrency(stats.totalIncome)}</p>
           </div>
-          <div className="bg-white dark:bg-dark-card p-6 rounded-2xl border border-slate-200/60 dark:border-dark-border shadow-sm group relative overflow-hidden">
+          <div className="bg-white dark:bg-dark-card p-4 sm:p-6 rounded-2xl border border-slate-200/60 dark:border-dark-border shadow-sm group relative overflow-hidden">
             <div className="absolute top-0 right-0 w-20 h-20 bg-red-500/5 rounded-full -mr-10 -mt-10 group-hover:scale-150 transition-transform duration-700" />
             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-1.5">Saídas</p>
             <p className="text-xl font-black text-red-500 tracking-tighter">{formatCurrency(stats.expenses)}</p>
           </div>
-          <div className="bg-blue-600 p-6 rounded-2xl shadow-2xl shadow-blue-600/30 group relative overflow-hidden">
+          <div className="bg-blue-600 p-4 sm:p-6 rounded-2xl shadow-2xl shadow-blue-600/30 group relative overflow-hidden">
             <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-10 -mt-10 group-hover:scale-150 transition-transform duration-700" />
             <p className="text-[9px] font-bold text-blue-100/60 uppercase tracking-[0.2em] mb-1.5">Saldo Livre</p>
             <p className="text-xl font-black text-white tracking-tighter">{formatCurrency(stats.remaining)}</p>
@@ -425,10 +425,10 @@ export default function ExpensesTab({ state, updateState, categories = CATEGORIE
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10">
         {/* Left Column: Chart & Summary */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="bg-white dark:bg-dark-card p-6 rounded-3xl border border-slate-200/60 dark:border-dark-border shadow-sm group relative overflow-hidden">
+          <div className="bg-white dark:bg-dark-card p-4 sm:p-6 rounded-3xl border border-slate-200/60 dark:border-dark-border shadow-sm group relative overflow-hidden">
             <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500/5 rounded-full -mr-20 -mt-20 group-hover:scale-110 transition-transform duration-700" />
             
             <div className="flex items-center justify-between mb-8 relative z-10">

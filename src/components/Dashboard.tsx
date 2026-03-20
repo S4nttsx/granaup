@@ -304,14 +304,14 @@ export default function Dashboard({ state, updateState, setActiveTab }: Dashboar
   const COLORS = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
   return (
-    <div className="max-w-7xl mx-auto space-y-10">
+    <div className="max-w-7xl mx-auto space-y-6 lg:space-y-10">
       {/* Header & Navigation */}
-      <div className="flex flex-col xl:flex-row items-center justify-between gap-6">
+      <div className="flex flex-col xl:flex-row items-center justify-between gap-4 lg:gap-6">
         <div className="space-y-1.5 text-center xl:text-left">
-          <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">
+          <h2 className="text-xl lg:text-2xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">
             Olá, <span className="text-blue-600">Investidor</span>
           </h2>
-          <p className="text-sm text-slate-500 font-medium">Aqui está o resumo estratégico de {capitalizedMonth}.</p>
+          <p className="text-xs lg:text-sm text-slate-500 font-medium">Aqui está o resumo estratégico de {capitalizedMonth}.</p>
         </div>
 
         <div className="flex items-center gap-3 bg-white dark:bg-dark-card p-1.5 rounded-2xl border border-slate-200/60 dark:border-dark-border shadow-sm group relative overflow-hidden">
@@ -359,10 +359,10 @@ export default function Dashboard({ state, updateState, setActiveTab }: Dashboar
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          className="space-y-10"
+          className="space-y-6 lg:space-y-10"
         >
           {/* Summary Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
             <SummaryCard 
               label="Salário & Renda" 
               value={formatCurrency(stats.salary)} 
@@ -781,7 +781,7 @@ function SummaryCard({ label, value, icon: Icon, color, trend, onClick }: any) {
       whileHover={{ y: -4, scale: 1.01 }}
       onClick={onClick}
       className={cn(
-        "p-6 bg-white dark:bg-dark-card rounded-3xl border border-slate-200/60 dark:border-dark-border shadow-sm flex flex-col gap-4 group transition-all duration-500 relative overflow-hidden",
+        "p-4 sm:p-6 bg-white dark:bg-dark-card rounded-3xl border border-slate-200/60 dark:border-dark-border shadow-sm flex flex-col gap-4 group transition-all duration-500 relative overflow-hidden",
         onClick && "cursor-pointer hover:border-blue-500/40 hover:shadow-2xl hover:shadow-blue-600/10"
       )}
     >

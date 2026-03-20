@@ -98,22 +98,22 @@ export default function SalaryTab({ state, updateState }: SalaryTabProps) {
   }, [state.salary, state.transactions]);
 
   return (
-    <div className="max-w-7xl mx-auto space-y-16">
+    <div className="max-w-7xl mx-auto space-y-10 lg:space-y-16">
       <div className="text-center space-y-3">
-        <div className="w-16 h-16 bg-emerald-600/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <DollarSign className="w-8 h-8 text-emerald-600" />
+        <div className="w-12 h-12 lg:w-16 lg:h-16 bg-emerald-600/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <DollarSign className="w-6 h-6 lg:w-8 lg:h-8 text-emerald-600" />
         </div>
-        <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">
+        <h2 className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-white tracking-tighter">
           Gestão de <span className="text-emerald-600">Salário e Despesas</span>
         </h2>
-        <p className="text-sm text-slate-500 font-medium max-w-lg mx-auto">Configure seu rendimento base e acompanhe o comprometimento da sua renda mensal com precisão.</p>
+        <p className="text-xs lg:text-sm text-slate-500 font-medium max-w-lg mx-auto">Configure seu rendimento base e acompanhe o comprometimento da sua renda mensal com precisão.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
         <motion.section 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white dark:bg-dark-card p-8 rounded-3xl border border-slate-200/60 dark:border-dark-border shadow-sm space-y-8 relative overflow-hidden group"
+          className="bg-white dark:bg-dark-card p-5 sm:p-8 rounded-3xl border border-slate-200/60 dark:border-dark-border shadow-sm space-y-6 lg:space-y-8 relative overflow-hidden group"
         >
           <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-500/5 rounded-full -mr-20 -mt-20 group-hover:scale-110 transition-transform duration-700" />
           
@@ -173,10 +173,10 @@ export default function SalaryTab({ state, updateState }: SalaryTabProps) {
           transition={{ delay: 0.1 }}
           className="space-y-6"
         >
-          <div className="bg-white dark:bg-dark-card p-8 rounded-3xl border border-slate-200/60 dark:border-dark-border shadow-sm h-full flex flex-col justify-between group relative overflow-hidden">
+          <div className="bg-white dark:bg-dark-card p-5 sm:p-8 rounded-3xl border border-slate-200/60 dark:border-dark-border shadow-sm h-full flex flex-col justify-between group relative overflow-hidden">
             <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500/5 rounded-full -mr-20 -mt-20 group-hover:scale-110 transition-transform duration-700" />
             
-            <div className="space-y-2 mb-8 relative z-10">
+            <div className="space-y-2 mb-6 lg:mb-8 relative z-10">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 bg-blue-600/10 rounded-xl flex items-center justify-center">
                   <ArrowDownRight className="w-4.5 h-4.5 text-blue-600" />
@@ -250,9 +250,9 @@ export default function SalaryTab({ state, updateState }: SalaryTabProps) {
         <ExpensesTab state={state} updateState={updateState} />
       </motion.section>
 
-      <div className="bg-emerald-50/50 dark:bg-emerald-500/5 p-8 rounded-3xl border border-emerald-100/50 dark:border-emerald-500/10 flex flex-col sm:flex-row items-center gap-6 group">
-        <div className="w-16 h-16 bg-emerald-600 text-white rounded-2xl flex items-center justify-center flex-shrink-0 shadow-2xl shadow-emerald-600/30 group-hover:scale-110 transition-transform">
-          <DollarSign className="w-8 h-8" />
+      <div className="bg-emerald-50/50 dark:bg-emerald-500/5 p-5 sm:p-8 rounded-3xl border border-emerald-100/50 dark:border-emerald-500/10 flex flex-col sm:flex-row items-center gap-6 group">
+        <div className="w-12 h-12 lg:w-16 lg:h-16 bg-emerald-600 text-white rounded-2xl flex items-center justify-center flex-shrink-0 shadow-2xl shadow-emerald-600/30 group-hover:scale-110 transition-transform">
+          <DollarSign className="w-6 h-6 lg:w-8 lg:h-8" />
         </div>
         <div className="space-y-1.5 text-center sm:text-left">
           <h4 className="text-lg font-bold text-slate-900 dark:text-white">Dica de Saúde Financeira</h4>
