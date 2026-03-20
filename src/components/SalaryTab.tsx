@@ -43,15 +43,25 @@ export default function SalaryTab({ state, updateState }: SalaryTabProps) {
       const targetTotalMonths = year * 12 + month;
       const diff = targetTotalMonths - startTotalMonths;
 
+      if (t.parentTransactionId) {
+        return (tMonth === month && tYear === year) ? t.amount : 0;
+      }
+
       if (t.recurrence && t.recurrence !== 'none') {
+        const hasChildThisMonth = state.transactions.some(child => 
+          child.parentTransactionId === t.id && 
+          new Date(child.date).getMonth() === month && 
+          new Date(child.date).getFullYear() === year
+        );
+        if (hasChildThisMonth) return 0;
+
+        const totalDuration = t.installments?.total || 999;
         if (t.recurrence === 'monthly') {
-          const totalMonths = t.installments?.total || 1;
-          if (diff >= 1 && diff <= totalMonths) return t.amount;
+          if (diff >= 0 && diff < totalDuration) return t.amount;
         } else if (t.recurrence === 'yearly') {
-          const totalYears = t.installments?.total || 1;
           const diffYears = Math.floor(diff / 12);
           const monthMatch = (diff % 12) === 0;
-          if (diffYears >= 1 && diffYears <= totalYears && monthMatch) return t.amount;
+          if (diffYears >= 0 && diffYears < totalDuration && monthMatch) return t.amount;
         }
         return 0;
       } else {

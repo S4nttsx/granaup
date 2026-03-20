@@ -132,15 +132,25 @@ export default function ExpensesTab({ state, updateState, categories = CATEGORIE
       const targetTotalMonths = year * 12 + month;
       const diff = targetTotalMonths - startTotalMonths;
 
+      if (t.parentTransactionId) {
+        return (tMonth === month && tYear === year) ? t.amount : 0;
+      }
+
       if (t.recurrence && t.recurrence !== 'none') {
+        const hasChildThisMonth = state.transactions.some(child => 
+          child.parentTransactionId === t.id && 
+          new Date(child.date).getMonth() === month && 
+          new Date(child.date).getFullYear() === year
+        );
+        if (hasChildThisMonth) return 0;
+
+        const totalDuration = t.installments?.total || 999;
         if (t.recurrence === 'monthly') {
-          const totalMonths = t.installments?.total || 1;
-          if (diff >= 1 && diff <= totalMonths) return t.amount;
+          if (diff >= 0 && diff < totalDuration) return t.amount;
         } else if (t.recurrence === 'yearly') {
-          const totalYears = t.installments?.total || 1;
           const diffYears = Math.floor(diff / 12);
           const monthMatch = (diff % 12) === 0;
-          if (diffYears >= 1 && diffYears <= totalYears && monthMatch) return t.amount;
+          if (diffYears >= 0 && diffYears < totalDuration && monthMatch) return t.amount;
         }
         return 0;
       } else {
@@ -592,6 +602,33 @@ export default function ExpensesTab({ state, updateState, categories = CATEGORIE
                       className="w-full px-5 py-3.5 bg-slate-50 dark:bg-dark-input border-2 border-slate-100 dark:border-dark-border rounded-xl outline-none focus:border-blue-600 transition-all font-bold text-sm"
                     />
                   </div>
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] ml-1">Recorrência</label>
+                    <select
+                      value={expenseRecurrence}
+                      onChange={(e) => setExpenseRecurrence(e.target.value as Transaction['recurrence'])}
+                      className="w-full px-5 py-3.5 bg-slate-50 dark:bg-dark-input border-2 border-slate-100 dark:border-dark-border rounded-xl outline-none focus:border-blue-600 transition-all font-bold cursor-pointer appearance-none text-sm"
+                    >
+                      <option value="none">Única</option>
+                      <option value="monthly">Mensal</option>
+                      <option value="yearly">Anual</option>
+                    </select>
+                  </div>
+                  {expenseRecurrence !== 'none' && (
+                    <div className="space-y-2">
+                      <label className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] ml-1">
+                        Duração ({expenseRecurrence === 'monthly' ? 'Meses' : 'Anos'})
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={expenseInstallments}
+                        onChange={(e) => setExpenseInstallments(e.target.value)}
+                        className="w-full px-5 py-3.5 bg-slate-50 dark:bg-dark-input border-2 border-slate-100 dark:border-dark-border rounded-xl outline-none focus:border-blue-600 transition-all font-bold text-sm"
+                        placeholder={expenseRecurrence === 'monthly' ? "Ex: 12 meses" : "Ex: 2 anos"}
+                      />
+                    </div>
+                  )}
                   {transactionType === 'expense' && (
                     <>
                       <div className="space-y-2">
