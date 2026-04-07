@@ -10,16 +10,18 @@ import {
   Moon, 
   Sun,
   AlertTriangle,
-  Building2
+  Building2,
+  FileText
 } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface SettingsTabProps {
   state: AppState;
   updateState: (updates: Partial<AppState>) => void;
+  setActiveTab: (tab: any) => void;
 }
 
-export default function SettingsTab({ state, updateState }: SettingsTabProps) {
+export default function SettingsTab({ state, updateState, setActiveTab }: SettingsTabProps) {
   
   const handleExport = () => {
     const dataStr = JSON.stringify(state);
@@ -219,6 +221,22 @@ export default function SettingsTab({ state, updateState }: SettingsTabProps) {
               Limpar Todos os Dados
             </button>
           </div>
+        </section>
+
+        {/* Legal Section */}
+        <section className="bg-white dark:bg-dark-card p-6 rounded-3xl border border-slate-200 dark:border-dark-border shadow-sm">
+          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-blue-600 dark:text-white">
+            <Shield className="w-5 h-5 text-blue-500" />
+            Informações Legais
+          </h3>
+          <p className="text-sm text-slate-500 mb-6">Consulte nossas políticas de privacidade e termos de uso para entender como protegemos seus dados.</p>
+          <button 
+            onClick={() => setActiveTab('legal')}
+            className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-slate-100 dark:bg-dark-hover hover:bg-slate-200 dark:hover:bg-dark-hover/80 rounded-2xl font-bold transition-all"
+          >
+            <FileText className="w-5 h-5" />
+            Ver Políticas e Termos
+          </button>
         </section>
       </div>
     </div>

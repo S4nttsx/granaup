@@ -19,7 +19,8 @@ import {
   Building2,
   Lightbulb,
   Calculator as CalcIcon,
-  Rocket
+  Rocket,
+  Shield
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { clsx, type ClassValue } from 'clsx';
@@ -42,6 +43,7 @@ import NewsTab from './components/NewsTab';
 import Calculator from './components/Calculator';
 import FutureSimulator from './components/FutureSimulator';
 import NotificationCenter from './components/NotificationCenter';
+import LegalTab from './components/LegalTab';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -236,6 +238,7 @@ export default function App() {
     { id: 'simulador', label: 'Simulador de Futuro', icon: Rocket },
     ...(state.isCompanyMode ? [{ id: 'empresa', label: 'Modo Empresa', icon: Building2 }] : []),
     { id: 'config', label: 'Configurações', icon: Settings },
+    { id: 'legal', label: 'Políticas e Legal', icon: Shield },
   ];
 
   const renderTab = () => {
@@ -250,7 +253,8 @@ export default function App() {
       case 'noticias': return <NewsTab state={state} updateState={updateState} />;
       case 'calculadora': return <Calculator state={state} updateState={updateState} />;
       case 'simulador': return <FutureSimulator state={state} updateState={updateState} />;
-      case 'config': return <SettingsTab state={state} updateState={updateState} />;
+      case 'config': return <SettingsTab state={state} updateState={updateState} setActiveTab={setActiveTab} />;
+      case 'legal': return <LegalTab state={state} updateState={updateState} />;
       default: return <Dashboard state={state} updateState={updateState} setActiveTab={setActiveTab} />;
     }
   };
@@ -340,6 +344,15 @@ export default function App() {
           </nav>
 
           <div className="p-4 border-t border-slate-100 dark:border-dark-border/50 space-y-1">
+            <button 
+              onClick={() => setActiveTab('legal')}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-dark-hover transition-all text-[11px] font-bold group"
+            >
+              <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-dark-input flex items-center justify-center group-hover:bg-blue-600/10 transition-colors">
+                <Shield className="w-3.5 h-3.5" />
+              </div>
+              <span>Privacidade e Termos</span>
+            </button>
             <button 
               onClick={() => updateState({ darkMode: !state.darkMode })}
               className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-dark-hover transition-all text-[11px] font-bold group"

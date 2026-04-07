@@ -15,7 +15,10 @@ import {
   CreditCard,
   Wallet,
   Receipt,
-  Building2
+  Building2,
+  CheckCircle2,
+  Circle,
+  RefreshCw
 } from 'lucide-react';
 import { 
   PieChart, 
@@ -75,6 +78,13 @@ export default function Dashboard({ state, updateState, setActiveTab }: Dashboar
       cards: updatedCards
     });
     setExpenseToDelete(null);
+  };
+
+  const togglePaid = (expense: Transaction) => {
+    const updatedTransactions = state.transactions.map(t => 
+      t.id === expense.id ? { ...t, paid: !t.paid } : t
+    );
+    updateState({ transactions: updatedTransactions });
   };
 
   const currentMonthName = selectedDate.toLocaleString('pt-BR', { month: 'long' });
@@ -642,12 +652,17 @@ export default function Dashboard({ state, updateState, setActiveTab }: Dashboar
                   return filtered.slice(0, 10).map((t) => (
                     <div key={t.id} className="flex flex-col sm:flex-row items-center justify-between p-4 bg-slate-50 dark:bg-dark-input rounded-2xl border border-slate-100 dark:border-dark-border hover:border-blue-600/40 transition-all group gap-4">
                       <div className="flex items-center gap-4 w-full sm:w-auto">
-                        <div className={cn(
-                          "w-11 h-11 rounded-xl flex items-center justify-center shadow-2xl transition-transform group-hover:scale-110",
-                          t.type === 'income' ? "bg-emerald-500 text-white shadow-emerald-500/30" : "bg-red-500 text-white shadow-red-500/30"
-                        )}>
-                          {t.type === 'income' ? <ArrowUpRight className="w-6 h-6" /> : <ArrowDownRight className="w-6 h-6" />}
-                        </div>
+                        <button 
+                          onClick={() => togglePaid(t)}
+                          className={cn(
+                            "w-11 h-11 rounded-xl flex items-center justify-center shadow-2xl transition-all active:scale-90",
+                            t.paid 
+                              ? "bg-emerald-500 text-white shadow-emerald-500/30" 
+                              : (t.type === 'income' ? "bg-emerald-500 text-white shadow-emerald-500/30" : "bg-red-500 text-white shadow-red-500/30")
+                          )}
+                        >
+                          {t.paid ? <CheckCircle2 className="w-6 h-6" /> : (t.type === 'income' ? <ArrowUpRight className="w-6 h-6" /> : <ArrowDownRight className="w-6 h-6" />)}
+                        </button>
                         <div className="flex-1">
                           <div className="flex items-center gap-2.5 flex-wrap">
                             <p className="font-black text-slate-900 dark:text-white text-base tracking-tight leading-none">{t.description}</p>

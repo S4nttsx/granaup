@@ -14,7 +14,9 @@ import {
   RefreshCw,
   ChevronLeft,
   ChevronRight,
-  CreditCard as CreditCardIcon
+  CreditCard as CreditCardIcon,
+  CheckCircle2,
+  Circle
 } from 'lucide-react';
 import { 
   PieChart, 
@@ -71,6 +73,7 @@ export default function ExpensesTab({ state, updateState, categories = CATEGORIE
   const [expenseInstallments, setExpenseInstallments] = useState('1');
   const [expensePaymentMethod, setExpensePaymentMethod] = useState<PaymentMethod>('dinheiro');
   const [expenseCardId, setExpenseCardId] = useState('');
+  const [expensePaid, setExpensePaid] = useState(false);
 
   // Process recurring expenses on mount
   useEffect(() => {
@@ -232,6 +235,7 @@ export default function ExpensesTab({ state, updateState, categories = CATEGORIE
       recurrence: expenseRecurrence,
       paymentMethod: expensePaymentMethod,
       cardId: expensePaymentMethod === 'credito' ? expenseCardId : undefined,
+      paid: expensePaid,
       installments: installmentsTotal > 1 ? {
         total: installmentsTotal,
         current: 1
@@ -269,6 +273,7 @@ export default function ExpensesTab({ state, updateState, categories = CATEGORIE
     setExpenseInstallments(expense.installments?.total.toString() || '1');
     setExpensePaymentMethod(expense.paymentMethod || 'dinheiro');
     setExpenseCardId(expense.cardId || '');
+    setExpensePaid(expense.paid || false);
     setIsAddingExpense(true);
   };
 
@@ -311,6 +316,7 @@ export default function ExpensesTab({ state, updateState, categories = CATEGORIE
             recurrence: expenseRecurrence,
             paymentMethod: expensePaymentMethod,
             cardId: expensePaymentMethod === 'credito' ? expenseCardId : undefined,
+            paid: expensePaid,
             installments: installmentsTotal > 1 ? {
               total: installmentsTotal,
               current: t.installments?.current || 1
@@ -336,6 +342,7 @@ export default function ExpensesTab({ state, updateState, categories = CATEGORIE
     setExpenseInstallments('1');
     setExpensePaymentMethod('dinheiro');
     setExpenseCardId('');
+    setExpensePaid(false);
     setIsAddingExpense(false);
     setEditingExpense(null);
   };
@@ -380,6 +387,13 @@ export default function ExpensesTab({ state, updateState, categories = CATEGORIE
       case 'yearly': return 'Anual';
       default: return 'Única';
     }
+  };
+
+  const togglePaid = (expense: Transaction) => {
+    const updatedTransactions = state.transactions.map(t => 
+      t.id === expense.id ? { ...t, paid: !t.paid } : t
+    );
+    updateState({ transactions: updatedTransactions });
   };
 
   return (
@@ -692,6 +706,33 @@ export default function ExpensesTab({ state, updateState, categories = CATEGORIE
                   )}
                 </div>
 
+                <div className="p-4 bg-slate-50 dark:bg-dark-input rounded-2xl border-2 border-slate-100 dark:border-dark-border flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={cn(
+                      "w-10 h-10 rounded-xl flex items-center justify-center transition-colors",
+                      expensePaid ? "bg-emerald-500/10 text-emerald-500" : "bg-slate-200 dark:bg-dark-hover text-slate-400"
+                    )}>
+                      {expensePaid ? <CheckCircle2 className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-slate-900 dark:text-white">Marcar como {transactionType === 'expense' ? 'Paga' : 'Recebida'}</p>
+                      <p className="text-[10px] text-slate-500 font-medium uppercase tracking-widest">Status da transação</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => setExpensePaid(!expensePaid)}
+                    className={cn(
+                      "w-14 h-8 rounded-full transition-all relative",
+                      expensePaid ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-700"
+                    )}
+                  >
+                    <div className={cn(
+                      "absolute top-1 w-6 h-6 bg-white rounded-full transition-all",
+                      expensePaid ? "left-7" : "left-1"
+                    )} />
+                  </button>
+                </div>
+
                 <div className="flex flex-col sm:flex-row gap-3 pt-4">
                   <button 
                     onClick={editingExpense ? handleUpdateExpense : handleAddExpense}
@@ -733,14 +774,20 @@ export default function ExpensesTab({ state, updateState, categories = CATEGORIE
                     className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:bg-slate-50/80 dark:hover:bg-dark-hover/30 transition-all group/item"
                   >
                     <div className="flex items-center gap-6 min-w-0">
-                      <div className={cn(
-                        "flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center shadow-sm transition-transform group-hover/item:scale-110",
-                        expense.type === 'expense' 
-                          ? "bg-red-50 dark:bg-red-500/10 text-red-500 border border-red-100 dark:border-red-500/20" 
-                          : "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 border border-emerald-100 dark:border-emerald-500/20"
-                      )}>
-                        {expense.recurrence && expense.recurrence !== 'none' ? <RefreshCw className="w-5 h-5" /> : (expense.type === 'expense' ? <ArrowDownRight className="w-5 h-5" /> : <ArrowUpRight className="w-5 h-5" />)}
-                      </div>
+                      <button 
+                        onClick={() => togglePaid(expense)}
+                        className={cn(
+                          "flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center shadow-sm transition-all active:scale-90",
+                          expense.paid 
+                            ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20" 
+                            : (expense.type === 'expense' 
+                                ? "bg-red-50 dark:bg-red-500/10 text-red-500 border border-red-100 dark:border-red-500/20" 
+                                : "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 border border-emerald-100 dark:border-emerald-500/20")
+                        )}
+                        title={expense.paid ? "Marcar como não pago" : "Marcar como pago"}
+                      >
+                        {expense.paid ? <CheckCircle2 className="w-6 h-6" /> : (expense.recurrence && expense.recurrence !== 'none' ? <RefreshCw className="w-5 h-5" /> : (expense.type === 'expense' ? <ArrowDownRight className="w-5 h-5" /> : <ArrowUpRight className="w-5 h-5" />))}
+                      </button>
                       <div className="min-w-0 space-y-1.5">
                         <div className="flex flex-wrap items-center gap-3">
                           <p className="text-xl font-black text-slate-900 dark:text-white truncate tracking-tighter leading-none">{expense.description}</p>

@@ -1,6 +1,6 @@
 import { LucideIcon } from 'lucide-react';
 
-export type TabType = 'dashboard' | 'metas' | 'investimentos' | 'cripto' | 'cartao' | 'config' | 'financeiro' | 'empresa' | 'salario' | 'noticias' | 'calculadora' | 'simulador';
+export type TabType = 'dashboard' | 'metas' | 'investimentos' | 'cripto' | 'cartao' | 'config' | 'financeiro' | 'empresa' | 'salario' | 'noticias' | 'calculadora' | 'simulador' | 'legal';
 
 export interface Customer {
   id: string;
@@ -80,6 +80,7 @@ export interface Transaction {
   parentTransactionId?: string;
   paymentMethod?: PaymentMethod;
   cardId?: string;
+  paid?: boolean;
   installments?: {
     total: number;
     current: number; // This might be redundant if we calculate based on date, but let's keep it for compatibility or specific overrides

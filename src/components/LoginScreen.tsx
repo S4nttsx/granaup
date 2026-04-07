@@ -91,7 +91,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
             </div>
 
             <button
-              onClick={() => onLogin({ name: 'Visitante', email: 'visitante@granaup.com' })}
+              onClick={() => onLogin({ name: 'Visitante', email: 'visitante@granaupp.com' })}
               className="w-full py-3 bg-slate-100 dark:bg-dark-hover hover:bg-slate-200 dark:hover:bg-dark-hover/80 text-slate-700 dark:text-slate-300 font-medium rounded-xl transition-all"
             >
               Continuar como Visitante
